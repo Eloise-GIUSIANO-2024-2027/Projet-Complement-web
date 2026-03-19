@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>R4.A.10 - Complément Web (Site)</title>
+    <link rel="stylesheet" href="../CSS/style.css">
+</head>
+    <body>
+    <section>
+        <br>
+        <div role="tablist">
+            <button id="btnJour" role="tab" aria-selected="true" class="active">Température du jour</button>
+            <button id="btnHist" role="tab" aria-selected="false">Historique des jours précédents</button>
+        </div>
+
+        <section id="zoneTab">
+            <article id="pageJour">
+                <h2>Température du jour : </h2>
+                <div id="comment"></div>
+                <p>
+                    Température du jour : <span id="zoneVal" aria-live="polite"  aria-atomic="true"></span>°C
+                </p>
+            </article>
+
+            <article id="pageHist" hidden>
+                <h3>Température des jours precedent : </h3>
+                <ul id="zoneValPrec" role="alert" aria-live="assertive"></ul>
+            </article>
+        </section>
+    </section>
+    <script src="../JavaScript/tableau.js"></script>
+    </body>
+</html>
