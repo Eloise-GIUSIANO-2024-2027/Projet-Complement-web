@@ -1,106 +1,242 @@
-const A_tabNum = [];
-const delay = 2000;
-let I_i = 0;
+/**
+ *  HotHotHot – Tableau de bord de température en temps réel
+ *  Ce projet affiche les températures intérieure et extérieure en temps réel,
+ *  avec des alertes visuelles et textuelles basées sur les seuils de température.
+ *  Il se connecte à un serveur WebSocket pour recevoir les données de température, gère les connexions et les erreurs,
+ *  et offre une interface utilisateur claire et réactive.
+ *
+ * @info : Le serveur WebSocket a été fait à l'aide l'IA (Claude), car nous ne connaissions pas grand chose au WebSocket.
+ * @author : Lou
+**/
+"use strict";
 
-function getNumbreTab(min, max)
-{
-    min = Math.ceil(-10);
-    max = Math.floor(40);
+const EventEmitter = (() => {
+    const _listeners = {};
 
-    for (let I_i = 0; I_i < 20; I_i++)
-    {
-        number = Math.floor(Math.random() * (max - min + 1)) + min;
-        A_tabNum.push(number);
+    return {
+        on(event, callback) {
+            if (!_listeners[event]) _listeners[event] = [];
+            _listeners[event].push(callback);
+        },
+
+        emit(event, data) {
+            (_listeners[event] || []).forEach(cb => cb(data));
+        },
+    };
+})();
+
+const Model = (() => {
+    const _state = {
+        int: { temp: null, min: null, max: null },
+        ext: { temp: null, min: null, max: null },
+    };
+
+    function updateTemp(id, temp) {
+        const sensor = _state[id];
+        sensor.temp = temp;
+
+        if (sensor.min === null || temp < sensor.min) sensor.min = temp;
+        if (sensor.max === null || temp > sensor.max) sensor.max = temp;
+
+        EventEmitter.emit("sensorUpdated", { id, ...sensor });
+    }
+    function getAlertInfo(id, temp) {
+        if (id === "int") {
+            if (temp < 0)  return { cssClass: "style-blue",   alerte: "Canalisations gelées, appelez SOS plombier et mettez un bonnet !", critique: true };
+            if (temp < 12) return { cssClass: "style-blue",   alerte: "Montez le chauffage ou mettez un gros pull !", critique: false };
+            if (temp > 50) return { cssClass: "style-red",    alerte: "Appelez les pompiers ou arrêtez votre barbecue !", critique: true };
+            if (temp > 22) return { cssClass: "style-orange", alerte: "Baissez le chauffage !", critique: false };
+            return { cssClass: "style-green", alerte: "", critique: false };
+        }
+
+        if (temp < 0)  return { cssClass: "style-blue",   alerte: "Banquise en vue !", critique: true };
+        if (temp > 35) return { cssClass: "style-red",    alerte: "Hot Hot Hot !", critique: true };
+        return { cssClass: "style-green", alerte: "", critique: false };
     }
 
-    return A_tabNum;
-}
+    return { updateTemp, getAlertInfo };
+})();
 
-console.log(getNumbreTab(A_tabNum));
+const View = (() => {
+    const _els = {
+        wsStatus:    document.getElementById("wsStatus"),
+        wsStatusDot: document.getElementById("wsStatusDot"),
 
-const zone = document.getElementById("zoneVal");
-const comment = document.getElementById("comment");
-const tempPrec = document.getElementById("zoneValPrec");
-const btnJour = document.getElementById("btnJour");
-const btnHist = document.getElementById("btnHist");
-const pageJour = document.getElementById("pageJour");
-const pageHist = document.getElementById("pageHist");
+        tempInt:    document.getElementById("temp-int"),
+        tempExt:    document.getElementById("temp-ext"),
 
-// Ancien code (gardé au cas ou)
-// function showTab()
-// {
-//     if (I_i < tabNum.length)
-//     {
-//         const I_val = A_tabNum[I_i];
-//         zone.textContent = I_val;
-//         changeStyle(I_val);
-//         I_i++;
-//         setInterval(showTab, delay);
-//     }
-//     else
-//     {
-//         clearInterval(intervalID);
-//     }
-// }
+        minmaxInt:  document.getElementById("minmax-int"),
+        minmaxExt:  document.getElementById("minmax-ext"),
 
-setInterval(function ()
-{
-    if (I_i > 0 && I_i <= 20)
-    {
-        showHistory(A_tabNum[I_i - 1]);
+        commentInt: document.getElementById("comment-int"),
+        commentExt: document.getElementById("comment-ext"),
+
+        capteurInt: document.getElementById("capteur-int"),
+        capteurExt: document.getElementById("capteur-ext"),
+
+        alerteDialog:  document.getElementById("alerteDialog"),
+        alerteMessage: document.getElementById("alerteMessage"),
+        alerteClose:   document.getElementById("alerteClose"),
+
+        btnJour: document.getElementById("btnJour"),
+        btnHist: document.getElementById("btnHist"),
+        pageJour: document.getElementById("pageJour"),
+        pageHist: document.getElementById("pageHist"),
+    };
+
+    function setWsStatus(status) {
+        const dotEl  = _els.wsStatusDot;
+        const textEl = _els.wsStatus;
+
+        dotEl.className = "ws-dot";
+
+        switch (status) {
+            case "connecting":
+                dotEl.classList.add("ws-dot--connecting");
+                textEl.textContent = "Connexion en cours…";
+                break;
+            case "connected":
+                dotEl.classList.add("ws-dot--connected");
+                textEl.textContent = "Connecté – données en direct";
+                break;
+            case "error":
+                dotEl.classList.add("ws-dot--error");
+                textEl.textContent = "Erreur de connexion – tentative de reconnexion…";
+                break;
+            case "closed":
+                dotEl.classList.add("ws-dot--error");
+                textEl.textContent = "Connexion fermée";
+                break;
+        }
     }
 
-    const I_val = A_tabNum[I_i];
-    zone.textContent = I_val;
-    addStyleAndComment(I_val);
-    I_i++;
-}, delay);
+    function renderSensor(data, alertInfo) {
+        const { id, temp, min, max } = data;
+        const { cssClass, alerte, critique } = alertInfo;
 
-function addStyleAndComment(value)
-{
-    /* Sans un remove de classList le style gardé sera celui du chiffre le + grand*/
-    zone.classList.remove(
-        "styleBlue", "styleGreen", "styleOrange","styleRed"
-    )
-    comment.textContent = "";
+        const tempEl    = id === "int" ? _els.tempInt    : _els.tempExt;
+        const minmaxEl  = id === "int" ? _els.minmaxInt  : _els.minmaxExt;
+        const commentEl = id === "int" ? _els.commentInt : _els.commentExt;
+        const cardEl    = id === "int" ? _els.capteurInt : _els.capteurExt;
 
-    if (value >= -10 && value < 0)
-    {
-        comment.textContent = "Brrrrrrr, un peu froid ce matin, mets ta cagoule !";
-        zone.classList.add("styleBlue");
+        tempEl.textContent = temp.toFixed(1);
+
+        if (min !== null && max !== null) {
+            minmaxEl.textContent = `Min ${min.toFixed(1)} °C · Max ${max.toFixed(1)} °C`;
+        }
+
+        cardEl.className = "capteur";
+        if (cssClass) cardEl.classList.add(cssClass);
+
+        commentEl.textContent = alerte;
+        commentEl.className = "capteur-alerte" + (critique ? " alerte-critique" : "");
     }
-    else if (value >= 0 && value < 20)
-    {
-        zone.classList.add("styleGreen");
-    }
-    else if (value >= 20 && value < 30)
-    {
-        zone.classList.add("styleOrange");
-    }
-    else if (value >= 30 && value <= 40)
-    {
-        comment.textContent = "Caliente ! Vamos a la playa, ho hoho hoho !!";
-        zone.classList.add("styleRed");
-    }
-}
 
-function showHistory(previousValue)
-{
-    const history = document.createElement("div");
-    history.textContent = "Jour " + (I_i - 1) + " : "  + previousValue + "°C";
-    tempPrec.appendChild(history);
-}
+    function showAlertDialog(message) {
+        _els.alerteMessage.textContent = message;
+        _els.alerteDialog.showModal();
+    }
 
-btnJour.addEventListener("click", () => {
-    btnJour.classList.add("active");
-    btnHist.classList.remove("active");
-    pageJour.hidden = false;
-    pageHist.hidden = true;
-});
+    function initTabs() {
+        function activate(btnActive, panelActive, btnOther, panelOther) {
+            btnActive.setAttribute("aria-selected", "true");
+            btnActive.classList.add("tab-btn--active");
+            panelActive.removeAttribute("hidden");
+            panelActive.classList.remove("tab-panel--hidden");
 
-btnHist.addEventListener("click", () => {
-    btnJour.classList.remove("active");
-    btnHist.classList.add("active");
-    pageHist.hidden = false;
-    pageJour.hidden = true;
-});
+            btnOther.setAttribute("aria-selected", "false");
+            btnOther.classList.remove("tab-btn--active");
+            panelOther.setAttribute("hidden", "");
+            panelOther.classList.add("tab-panel--hidden");
+        }
+
+        _els.btnJour.addEventListener("click", () =>
+            activate(_els.btnJour, _els.pageJour, _els.btnHist, _els.pageHist)
+        );
+
+        _els.btnHist.addEventListener("click", () =>
+            activate(_els.btnHist, _els.pageHist, _els.btnJour, _els.pageJour)
+        );
+    }
+
+    function initAlertClose() {
+        _els.alerteClose.addEventListener("click", () => {
+            _els.alerteDialog.close();
+        });
+    }
+
+    return { setWsStatus, renderSensor, showAlertDialog, initTabs, initAlertClose };
+})();
+
+const Controller = (() => {
+    const WS_URL = "wss://ws.hothothot.dog:9502";
+    const RECONNECT_DELAY_MS = 5000;
+    let _ws = null;
+
+    function _initObservers() {
+        EventEmitter.on("sensorUpdated", ({ id, temp, min, max }) => {
+            const alertInfo = Model.getAlertInfo(id, temp);
+            View.renderSensor({ id, temp, min, max }, alertInfo);
+
+            if (alertInfo.critique && alertInfo.alerte) {
+                View.showAlertDialog(alertInfo.alerte);
+            }
+        });
+    }
+
+    function _handleMessage(rawData) {
+        try {
+            const parsed = JSON.parse(rawData);
+
+            if (parsed.int !== undefined && parsed.ext !== undefined) {
+                Model.updateTemp("int", Number(parsed.int));
+                Model.updateTemp("ext", Number(parsed.ext));
+                return;
+            }
+
+            if (parsed.sensor && parsed.value !== undefined) {
+                const id = parsed.sensor === "int" || parsed.sensor === "interieur" ? "int" : "ext";
+                Model.updateTemp(id, Number(parsed.value));
+                return;
+            }
+
+            console.warn("HotHotHot – format de message inconnu :", parsed);
+        } catch (err) {
+            console.error("HotHotHot – erreur parsing WebSocket :", err, rawData);
+        }
+    }
+
+    function _connect() {
+        View.setWsStatus("connecting");
+
+        _ws = new WebSocket(WS_URL);
+
+        _ws.addEventListener("open", () => {
+            View.setWsStatus("connected");
+        });
+
+        _ws.addEventListener("message", (event) => {
+            _handleMessage(event.data);
+        });
+
+        _ws.addEventListener("error", () => {
+            View.setWsStatus("error");
+        });
+
+        _ws.addEventListener("close", () => {
+            View.setWsStatus("closed");
+            setTimeout(_connect, RECONNECT_DELAY_MS);
+        });
+    }
+
+    function init() {
+        _initObservers();
+        View.initTabs();
+        View.initAlertClose();
+        _connect();
+    }
+
+    return { init };
+})();
+
+document.addEventListener("DOMContentLoaded", () => Controller.init());
