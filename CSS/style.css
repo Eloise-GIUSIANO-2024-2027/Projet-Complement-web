@@ -104,16 +104,6 @@ body {
 
 .nav-link.active { color: var(--color-accent); }
 
-.nav-link--deconnexion {
-    color: var(--color-red);
-    border: 1px solid transparent;
-}
-.nav-link--deconnexion:hover {
-    background: rgba(248, 81, 73, .1);
-    border-color: var(--color-red);
-    color: var(--color-red);
-}
-
 /* Main wrapper */
 .main {
     max-width: 1100px;
