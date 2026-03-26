@@ -1,37 +1,129 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
-    <title>R4.A.10 - Complément Web</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HotHotHot – Tableau de bord</title>
     <link rel="stylesheet" href="../CSS/style.css">
     <script src="../node_modules/chart.js/dist/chart.umd.js"></script>
 </head>
 <body>
-<section>
-    <br>
-    <div role="tablist">
-        <button id="btnJour" role="tab" aria-selected="true" class="active">Température du jour</button>
-        <button id="btnHist" role="tab" aria-selected="false">Historique des jours précédents</button>
+
+<header class="header">
+    <div class="header-inner">
+        <div class="logo">
+            <span class="logo-text">HotHotHot</span>
+        </div>
+        <nav class="nav" aria-label="Navigation principale">
+            <a href="#" class="nav-link active" aria-current="page">Accueil</a>
+            <a href="documentation.html" class="nav-link">Documentation</a>
+            <a href="compte.html" class="nav-link">Mon compte</a>
+        </nav>
     </div>
+</header>
 
-    <section id="zoneTab">
-        <article id="pageJour">
-            <h2>Température du jour : </h2>
-            <div id="comment"></div>
-            <p>
-                Température du jour : <span id="zoneVal" aria-live="polite"  aria-atomic="true"></span>°C
+<main class="main">
+
+    <div class="tab-bar" role="tablist" aria-label="Navigation des vues">
+        <button
+                id="btnJour"
+                class="tab-btn tab-btn--active"
+                role="tab"
+                aria-selected="true"
+                aria-controls="pageJour"
+        >
+            <span aria-hidden="true">📡</span> Temps réel
+        </button>
+        <button
+                id="btnHist"
+                class="tab-btn"
+                role="tab"
+                aria-selected="false"
+                aria-controls="pageHist"
+        >
+             Historique
+        </button>
+    </div>
+    <section
+            id="pageJour"
+            class="tab-panel"
+            role="tabpanel"
+            aria-labelledby="btnJour"
+    >
+        <div class="ws-status-bar">
+            <span id="wsStatusDot" class="ws-dot ws-dot--connecting" aria-hidden="true"></span>
+            <p id="wsStatus" class="ws-status" aria-live="polite" aria-atomic="true">
+                Connexion en cours…
             </p>
-        </article>
+        </div>
 
-        <article id="pageHist" hidden>
-            <h3>Température des jours précédents :</h3>
-            <div style="display: flex; flex-direction: row; align-items: flex-start; gap: 40px;">
-                <ul id="zoneValPrec" role="alert" aria-live="assertive"></ul>
-                <canvas id="tempChart" style="width: 400px; height: 200px;"></canvas>
-            </div>
-        </article>
+        <div class="capteurs-grid">
+
+            <article class="capteur" id="capteur-int" aria-label="Capteur intérieur">
+                <header class="capteur-header">
+                    <h2 class="capteur-titre">Intérieur</h2>
+                </header>
+                <div class="capteur-valeur-wrapper">
+            <span
+                    id="temp-int"
+                    class="capteur-valeur"
+                    aria-live="polite"
+                    aria-atomic="true"
+                    aria-label="Température intérieure"
+            >--</span>
+                    <span class="capteur-unite" aria-hidden="true">°C</span>
+                </div>
+                <p id="minmax-int" class="capteur-minmax" aria-live="polite"></p>
+                <p id="comment-int" class="capteur-alerte" aria-live="assertive" aria-atomic="true"></p>
+            </article>
     </section>
-</section>
+
+<script src="../JavaScript/tableau.js"></script>
+            <article class="capteur" id="capteur-ext" aria-label="Capteur extérieur">
+                <header class="capteur-header">
+                    <h2 class="capteur-titre">Extérieur</h2>
+                </header>
+                <div class="capteur-valeur-wrapper">
+            <span
+                    id="temp-ext"
+                    class="capteur-valeur"
+                    aria-live="polite"
+                    aria-atomic="true"
+                    aria-label="Température extérieure"
+            >--</span>
+                    <span class="capteur-unite" aria-hidden="true">°C</span>
+                </div>
+                <p id="minmax-ext" class="capteur-minmax" aria-live="polite"></p>
+                <p id="comment-ext" class="capteur-alerte" aria-live="assertive" aria-atomic="true"></p>
+            </article>
+
+        </div>
+    </section>
+    <section
+            id="pageHist"
+            class="tab-panel tab-panel--hidden"
+            role="tabpanel"
+            aria-labelledby="btnHist"
+            hidden
+    >
+        <h2 class="panel-titre">Historique des températures</h2>
+        <p class="panel-placeholder">Le graphe d'historique sera affiché ici (Lot 2).</p>
+
+        <h3>Température des jours précédents :</h3>
+        <div style="display: flex; flex-direction: row; align-items: flex-start; gap: 40px;">
+            <ul id="zoneValPrec" role="alert" aria-live="assertive"></ul>
+            <canvas id="tempChart" style="width: 400px; height: 200px;"></canvas>
+        </div>
+
+    </section>
+</main>
+
+<dialog id="alerteDialog" class="alerte-dialog" aria-modal="true" aria-labelledby="alerteTitre">
+    <h2 id="alerteTitre" class="alerte-dialog-titre">Alerte</h2>
+    <p id="alerteMessage" class="alerte-dialog-message"></p>
+    <button id="alerteClose" class="alerte-dialog-close" autofocus>Fermer</button>
+</dialog>
+
 <script src="../JavaScript/tableau.js"></script>
 </body>
 </html>
