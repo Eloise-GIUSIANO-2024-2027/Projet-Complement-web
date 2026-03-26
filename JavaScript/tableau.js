@@ -26,22 +26,37 @@ const btnHist = document.getElementById("btnHist");
 const pageJour = document.getElementById("pageJour");
 const pageHist = document.getElementById("pageHist");
 
-// Ancien code (gardé au cas ou)
-// function showTab()
-// {
-//     if (I_i < tabNum.length)
-//     {
-//         const I_val = A_tabNum[I_i];
-//         zone.textContent = I_val;
-//         changeStyle(I_val);
-//         I_i++;
-//         setInterval(showTab, delay);
-//     }
-//     else
-//     {
-//         clearInterval(intervalID);
-//     }
-// }
+const ctx = document.getElementById("tempChart").getContext("2d");
+const tempChart = new Chart(ctx, {
+    type: "line",
+    data: {
+        labels: [],
+        datasets: [{
+            label: "Température (°C)",
+            data: [],
+            borderColor: "#4a90d9",
+            backgroundColor: "rgba(74, 144, 217, 0.1)",
+            borderWidth: 2,
+            pointRadius: 4,
+            tension: 0.3,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: false,
+        animation: false,
+        scales: {
+            y: {
+                min: -10,
+                max: 40,
+                title: { display: true, text: "°C" }
+            },
+            x: {
+                title: { display: true, text: "Jour" }
+            }
+        }
+    }
+});
 
 setInterval(function ()
 {
@@ -58,7 +73,6 @@ setInterval(function ()
 
 function addStyleAndComment(value)
 {
-    /* Sans un remove de classList le style gardé sera celui du chiffre le + grand*/
     zone.classList.remove(
         "styleBlue", "styleGreen", "styleOrange","styleRed"
     )
@@ -89,6 +103,10 @@ function showHistory(previousValue)
     const history = document.createElement("div");
     history.textContent = "Jour " + (I_i - 1) + " : "  + previousValue + "°C";
     tempPrec.appendChild(history);
+
+    tempChart.data.labels.push("Jour " + (I_i - 1));
+    tempChart.data.datasets[0].data.push(previousValue);
+    tempChart.update();
 }
 
 btnJour.addEventListener("click", () => {
