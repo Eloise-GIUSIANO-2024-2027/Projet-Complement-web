@@ -1,6 +1,11 @@
 "use strict";
 
 const tempPrec = document.getElementById("zoneValPrec");
+
+const MAX_POINTS = 45;
+const dataInt = [];
+const dataExt = [];
+
 const EventEmitter = (() => {
     const _listeners = {};
 
@@ -28,6 +33,14 @@ const Model = (() => {
 
         if (sensor.min === null || temp < sensor.min) sensor.min = temp;
         if (sensor.max === null || temp > sensor.max) sensor.max = temp;
+
+        if (id === "int") {
+            dataInt.push(temp);
+            if (dataInt.length > MAX_POINTS) dataInt.shift();
+        } else {
+            dataExt.push(temp);
+            if (dataExt.length > MAX_POINTS) dataExt.shift();
+        }
 
         EventEmitter.emit("sensorUpdated", { id, ...sensor });
     }
@@ -160,6 +173,47 @@ const View = (() => {
     return { setWsStatus, renderSensor, showAlertDialog, initTabs, initAlertClose };
 })();
 
+const _makeChartConfig = (label, color) => ({
+    type: "line",
+    data: {
+        labels: [],
+        datasets: [{
+            label,
+            data: [],
+            borderColor: color,
+            backgroundColor: color.replace("rgb(", "rgba(").replace(")", ", 0.1)"),
+            borderWidth: 2,
+            pointRadius: 4,
+            tension: 0.3,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: false,
+        animation: false,
+        scales: {
+            y: {
+                min: -10,
+                max: 40,
+                title: { display: true, text: "°C" }
+            },
+            x: {
+                title: { display: true, text: "Mesure" }
+            }
+        }
+    }
+});
+
+const tempChartInt = new Chart(
+    document.getElementById("tempChartInt").getContext("2d"),
+    _makeChartConfig("Intérieur (°C)", "rgb(74, 144, 217)")
+);
+
+const tempChartExt = new Chart(
+    document.getElementById("tempChartExt").getContext("2d"),
+    _makeChartConfig("Extérieur (°C)", "rgb(217, 107, 74)")
+);
+
 const Controller = (() => {
     const WS_URL = "wss://ws.hothothot.dog:9502";
     const RECONNECT_DELAY_MS = 5000;
@@ -173,6 +227,14 @@ const Controller = (() => {
             if (alertInfo.critique && alertInfo.alerte) {
                 View.showAlertDialog(alertInfo.alerte);
             }
+
+            const arr    = id === "int" ? dataInt : dataExt;
+            const chart  = id === "int" ? tempChartInt : tempChartExt;
+            const labels = Array.from({ length: arr.length }, (_, i) => i + 1);
+
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = [...arr];
+            chart.update();
         });
     }
 
@@ -228,47 +290,10 @@ const Controller = (() => {
     return { init };
 })();
 
-const ctx = document.getElementById("tempChart").getContext("2d");
-
-const tempChart = new Chart(ctx, {
-    type: "line",
-    data: {
-        labels: [],
-        datasets: [{
-            label: "Température (°C)",
-            data: [],
-            borderColor: "#4a90d9",
-            backgroundColor: "rgba(74, 144, 217, 0.1)",
-            borderWidth: 2,
-            pointRadius: 4,
-            tension: 0.3,
-            fill: true
-        }]
-    },
-    options: {
-        responsive: false,
-        animation: false,
-        scales: {
-            y: {
-                min: -10,
-                max: 40,
-                title: { display: true, text: "°C" }
-            },
-            x: {
-                title: { display: true, text: "Jour" }
-            }
-        }
-    }
-});
-
 function showHistory(previousValue) {
     const history = document.createElement("div");
     history.textContent = "Jour " + (I_i - 1) + " : " + previousValue + "°C";
     tempPrec.appendChild(history);
-
-    tempChart.data.labels.push("Jour " + (I_i - 1));
-    tempChart.data.datasets[0].data.push(previousValue);
-    tempChart.update();
 }
 
 document.addEventListener("DOMContentLoaded", () => Controller.init());
