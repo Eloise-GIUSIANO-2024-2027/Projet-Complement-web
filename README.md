@@ -1,7 +1,7 @@
 # HotHotHot – Tableau de bord
 
 Projet de la ressource R4.4.10 - Complément Web de l'IUT d'Aix-Marseille.
-Ce travail a été fait par 3 étudiant(e)s de 2ème année **Lou DECAMPS, Eloise GUISIANO** et **Oriane MEJEAN**.
+Ce travail a été fait par 3 étudiant(e)s de 2ème année **Lou DECAMPS, Eloise GIUSIANO** et **Oriane MEJEAN**.
 
 ---
 ## Description
@@ -20,7 +20,7 @@ Elle affiche ces données, leur historique et propose des suggestions. De plus, 
 ## Membres de l'équipe
 
 - [Lou DECAMPS](https://github.com/Lou-Decamps)
-- [Eloise GUISIANO](https://github.com/Eloise-GIUSIANO-2024-2027)
+- [Eloise GIUSIANO](https://github.com/Eloise-GIUSIANO-2024-2027)
 - [Oriane MEJEAN](https://github.com/orianeMEJEAN)
 
 ### Accès au projet
