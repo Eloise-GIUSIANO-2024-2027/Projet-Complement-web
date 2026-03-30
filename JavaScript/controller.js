@@ -61,4 +61,7 @@ const Controller = (() => {
     return { init };
 })();
 
-document.addEventListener("DOMContentLoaded", () => Controller.init());
+document.addEventListener("DOMContentLoaded", () => {
+    View.initTabs();
+    View.initAlertClose();
+});

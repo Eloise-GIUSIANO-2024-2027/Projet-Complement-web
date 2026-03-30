@@ -27,13 +27,15 @@ const View = (() => {
         pageHist: document.getElementById("pageHist"),
     };
 
-    function setWsStatus(status) {
+    function setWsStatus(status)
+    {
         const dotEl  = _els.wsStatusDot;
         const textEl = _els.wsStatus;
 
         dotEl.className = "ws-dot";
 
-        switch (status) {
+        switch (status)
+        {
             case "connecting":
                 dotEl.classList.add("ws-dot--connecting");
                 textEl.textContent = "Connexion en cours…";
@@ -53,7 +55,8 @@ const View = (() => {
         }
     }
 
-    function renderSensor(data, alertInfo) {
+    function renderSensor(data, alertInfo)
+    {
         const { id, temp, min, max } = data;
         const { cssClass, alerte, critique } = alertInfo;
 
@@ -64,7 +67,8 @@ const View = (() => {
 
         tempEl.textContent = temp.toFixed(1);
 
-        if (min !== null && max !== null) {
+        if (min !== null && max !== null)
+        {
             minmaxEl.textContent = `Min ${min.toFixed(1)} °C · Max ${max.toFixed(1)} °C`;
         }
 
@@ -75,12 +79,16 @@ const View = (() => {
         commentEl.className = "capteur-alerte" + (critique ? " alerte-critique" : "");
     }
 
-    function showAlertDialog(message) {
+    function showAlertDialog(message)
+    {
         _els.alerteMessage.textContent = message;
         _els.alerteDialog.showModal();
     }
 
-    function initTabs() {
+    function initTabs()
+    {
+        if (!_els.btnJour || !_els.btnHist) return;
+
         function activate(btnActive, panelActive, btnOther, panelOther) {
             btnActive.setAttribute("aria-selected", "true");
             btnActive.classList.add("tab-btn--active");
@@ -102,7 +110,10 @@ const View = (() => {
         );
     }
 
-    function initAlertClose() {
+    function initAlertClose()
+    {
+        if (!_els.alerteClose || !_els.alerteDialog) return;
+
         _els.alerteClose.addEventListener("click", () => {
             _els.alerteDialog.close();
         });
