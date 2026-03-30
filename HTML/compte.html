@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr" xmlns="http://www.w3.org/1999/html">
+<html lang="fr">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,10 +7,11 @@
         <link rel="manifest" href="/manifest.json">
         <meta name="theme-color" content="#4a90d9">
 
+        <link rel="stylesheet" href="/CSS/theme.css">
         <link rel="stylesheet" href="/CSS/style.css">
         <link rel="stylesheet" href="/CSS/compte.css">
-
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+        <link rel="stylesheet" href="/CSS/header.css">
+        <link rel="stylesheet" href="/CSS/footer.css">
     </head>
     <body>
         <header class="header">
@@ -19,9 +20,10 @@
                     <span class="logo-text">HotHotHot</span>
                 </div>
                 <nav class="nav" aria-label="Navigation principale">
-                    <a href="../HTML/index.html" class="nav-link active" aria-current="page">Accueil</a>
-                    <a href="../HTML/documentation.html" class="nav-link">Documentation</a>
-                    <a href="../HTML/compte.html" class="nav-link">Mon compte</a>
+                    <a href="../HTML/index.html" class="nav-link">Accueil</a>
+                    <a href="../HTML/doc.html" class="nav-link" aria-current="page">Documentation</a>
+                    <a href="../HTML/install.html" class="nav-link">Installation</a>
+                    <a href="../HTML/compte.html" class="nav-link active" aria-current="page">Mon compte</a>
                 </nav>
             </div>
         </header>
@@ -32,12 +34,19 @@
                 {insérer texte}
             </p>
 
-
-            <button id="btnInstall">
-                Installer l'application
-            </button>
-
         </main>
+
+        <footer>
+            <div class="footer-grid">
+                <div class="footer-bottom">
+                    <span>© 2026 HotHotHot — Fait avec <em>♥</em> pour la chaleur</span>
+                    <div class="footer-links">
+                        <a href="#">Confidentialité</a>
+                        <a href="#">CGU</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
 
         <dialog id="alerteDialog" class="alerte-dialog" aria-modal="true" aria-labelledby="alerteTitre">
             <h2 id="alerteTitre" class="alerte-dialog-titre">Alerte</h2>
@@ -45,11 +54,9 @@
             <button id="alerteClose" class="alerte-dialog-close" autofocus>Fermer</button>
         </dialog>
 
-        <script src="/JavaScript/eventEmitter.js"></script>
-        <script src="/JavaScript/model.js"></script>
-        <script src="/JavaScript/view.js"></script>
-        <script src="/JavaScript/historique.js"></script>
-        <script src="/JavaScript/controller.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+        <script src="/JavaScript/tableau.js"></script>
         <script src="/JavaScript/pwa.js"></script>
+        <script src="/JavaScript/nav.js"></script>
     </body>
 </html>

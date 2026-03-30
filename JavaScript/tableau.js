@@ -1,6 +1,8 @@
 "use strict";
 
 const tempPrec = document.getElementById("zoneValPrec");
+const canvasInt = document.getElementById("tempChartInt");
+const canvasExt = document.getElementById("tempChartExt");
 
 const MAX_POINTS = 45;
 const dataInt = [];
@@ -205,12 +207,12 @@ const _makeChartConfig = (label, color) => ({
 });
 
 const tempChartInt = new Chart(
-    document.getElementById("tempChartInt").getContext("2d"),
+    canvasInt.getContext("2d"),
     _makeChartConfig("Intérieur (°C)", "rgb(74, 144, 217)")
 );
 
 const tempChartExt = new Chart(
-    document.getElementById("tempChartExt").getContext("2d"),
+    canvasExt.getContext("2d"),
     _makeChartConfig("Extérieur (°C)", "rgb(217, 107, 74)")
 );
 
