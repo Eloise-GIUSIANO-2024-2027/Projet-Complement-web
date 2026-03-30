@@ -15,31 +15,16 @@ body {
     font-family: var(--font-body);
     min-height: 100vh;
     line-height: 1.5;
-}
-
-.header {
-    background-color: var(--bg-header);
-    border-bottom: 1px solid var(--border-dim);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-
-.header-inner {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 1.5rem;
-    height: 60px;
     display: flex;
     flex-direction: column;
 }
 
 .main {
     max-width: 1100px;
-    width: 100%;
     margin: 0 auto;
     padding: 2rem 1.5rem 4rem;
     flex: 1;
+    width: 100%;
 }
 
 .tab-bar {
@@ -75,7 +60,6 @@ body {
     border-bottom-color: var(--color-accent);
 }
 
-/* Tab panels */
 .tab-panel--hidden { display: none; }
 
 .panel-titre {
@@ -86,7 +70,6 @@ body {
 
 .panel-placeholder { color: var(--text-secondary); }
 
-/* WebSocket status */
 .ws-status-bar {
     display: flex;
     align-items: center;
@@ -117,10 +100,9 @@ body {
     font-family: var(--font-display);
 }
 
-/* Capteurs côte à côte */
 .capteurs-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
 }
 
@@ -200,7 +182,6 @@ body {
     font-style: normal;
 }
 
-/* Dialog d'alerte */
 .alerte-dialog {
     background: var(--bg-card);
     color: var(--text-primary);
@@ -244,10 +225,14 @@ body {
 .alerte-dialog-close:hover { opacity: .85; }
 
 @media (max-width: 600px) {
-    .capteurs-grid {
-        grid-template-columns: 1fr;
-    }
-
+    .header-inner { flex-direction: column; height: auto; padding: .75rem 1rem; }
+    .nav { justify-content: center; }
     .capteur-valeur { font-size: 2.8rem; }
     .main { padding: 1.25rem 1rem 3rem; }
+}
+
+@media (max-width: 768px) {
+    #pageHist > div {
+        flex-direction: column !important;
+    }
 }
