@@ -1,13 +1,29 @@
 const CACHE_NAME = "hothothot-v2";
 const OFFLINE_URL = "/HTML/offline.html";
 
+const FILES_TO_CACHE = [
+    "/HTML/index.html",
+    "/CSS/style.css",
+    "/JavaScript/eventEmitter.js",
+    "/JavaScript/model.js",
+    "/JavaScript/view.js",
+    "/JavaScript/historique.js",
+    "/JavaScript/controller.js",
+    "/JavaScript/pwa.js",
+    "/manifest.json",
+    "/Icons/icon-192.png",
+    "/Icons/icon-512.png",
+    "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js",
+    OFFLINE_URL
+];
+
 self.addEventListener("install", (event) => {
     console.log("[SW] Installation…");
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(OFFLINE_URL, FILES_TO_CACHE);
+                return cache.addAll(FILES_TO_CACHE);
         }).then(() => {
-            console.log("[SW] Page offline mise en cache ✓");
+            console.log("[SW] Page offline mise en cache");
         }).catch((err) => {
             console.error("[SW] Erreur lors de l'installation :", err);
         })
