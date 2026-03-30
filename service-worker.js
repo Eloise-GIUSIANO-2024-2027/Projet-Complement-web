@@ -1,22 +1,5 @@
-"use strict";
-
 const CACHE_NAME = "hothothot-v2";
 const OFFLINE_URL = "/HTML/offline.html";
-
-const FILES_TO_CACHE = [
-    "/HTML/index.html",
-    "/CSS/style.css",
-    "/JavaScript/eventEmitter.js",
-    "/JavaScript/model.js",
-    "/JavaScript/view.js",
-    "/JavaScript/historique.js",
-    "/JavaScript/controller.js",
-    "/JavaScript/pwa.js",
-    "/manifest.json",
-    "/Icons/icon-192.png",
-    "/Icons/icon-512.png",
-    "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"
-];
 
 self.addEventListener("install", (event) => {
     console.log("[SW] Installation…");
@@ -35,17 +18,14 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
     console.log("[SW] Activation…");
     event.waitUntil(
-        caches.keys().then((cacheNames, keys) =>
+        caches.keys().then((cacheNames) =>
             Promise.all(
                 cacheNames
                     .filter((name) => name !== CACHE_NAME)
                     .map((name) => {
                         console.log("[SW] Suppression ancien cache :", name);
                         return caches.delete(name);
-                    }),
-                keys
-                    .filter(key => key !== CACHE_NAME)
-                    .map(key => caches.delete(key))
+                    })
             )
         )
     );
@@ -75,10 +55,6 @@ self.addEventListener("fetch", (event) => {
                         return caches.match(OFFLINE_URL);
                     });
                 })
-        );
-        event.respondWith(
-            caches.match(event.request)
-                .then(cached => cached || fetch(event.request))
         );
         return;
     }

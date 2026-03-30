@@ -8,8 +8,7 @@
     <link rel="stylesheet" href="../CSS/header.css">
     <link rel="stylesheet" href="../CSS/style.css">
     <link rel="stylesheet" href="../CSS/footer.css">
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script></head>
+</head>
 <body>
 
 <header class="header">
@@ -108,7 +107,7 @@
             aria-labelledby="btnHist"
             hidden
     >
-        <h2 class="panel-titre">Historique des températures</h2>
+        <h2 class="panel-titre">Historique des températures sous forme de graphe</h2>
 
         <h3>Température des jours précédents :</h3>
         <div style="display: flex; flex-direction: row; align-items: flex-start; gap: 40px;">
@@ -136,6 +135,8 @@
     <button id="alerteClose" class="alerte-dialog-close" autofocus>Fermer</button>
 </dialog>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="../JavaScript/tableau.js"></script>
+<script src="../JavaScript/sw-registration.js" defer></script>
 </body>
 </html>
