@@ -54,8 +54,8 @@ const Model = (() => {
             return { cssClass: "style-green", alerte: "", critique: false };
         }
 
-        if (temp < 0)  return { cssClass: "style-blue",   alerte: "Banquise en vue !", critique: true };
-        if (temp > 35) return { cssClass: "style-red",    alerte: "Hot Hot Hot !", critique: true };
+        if (temp < 0)  return { cssClass: "style-blue",  alerte: "Banquise en vue !", critique: true };
+        if (temp > 35) return { cssClass: "style-red",   alerte: "Hot Hot Hot !", critique: true };
         return { cssClass: "style-green", alerte: "", critique: false };
     }
 
@@ -224,8 +224,13 @@ const Controller = (() => {
             const alertInfo = Model.getAlertInfo(id, temp);
             View.renderSensor({ id, temp, min, max }, alertInfo);
 
-            if (alertInfo.critique && alertInfo.alerte) {
-                View.showAlertDialog(alertInfo.alerte);
+            if (alertInfo.alerte) {
+                iziToast[alertInfo.critique ? "error" : "warning"]({
+                    title: alertInfo.critique ? "Alerte critique" : "Attention",
+                    message: alertInfo.alerte,
+                    position: "topRight",
+                    timeout: 5000,
+                });
             }
 
             const arr    = id === "int" ? dataInt : dataExt;
@@ -244,8 +249,10 @@ const Controller = (() => {
 
             if (parsed.capteurs && Array.isArray(parsed.capteurs)) {
                 parsed.capteurs.forEach(capteur => {
+                    console.log("Nom reçu :", capteur.Nom);
                     const id = capteur.Nom === "interieur" ? "int" : "ext";
                     Model.updateTemp(id, Number(capteur.Valeur));
+                    console.log(`Donnée reçue pour ${capteur.Nom} -> assignée à l'ID : ${id}`);
                 });
                 return;
             }

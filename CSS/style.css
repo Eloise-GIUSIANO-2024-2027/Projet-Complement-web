@@ -276,6 +276,13 @@ body {
     transition: opacity var(--transition);
 }
 
+.TABLEAU {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 20px;
+    width: 100%;
+}
 .alerte-dialog-close:hover { opacity: .85; }
 
 @media (max-width: 600px) {
