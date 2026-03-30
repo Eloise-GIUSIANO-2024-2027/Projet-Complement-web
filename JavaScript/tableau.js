@@ -270,4 +270,6 @@ function showHistory(previousValue)
     tempChart.data.datasets[0].data.push(previousValue);
     tempChart.update();
 }
-document.addEventListener("DOMContentLoaded", () => Controller.init());
+
+
+
