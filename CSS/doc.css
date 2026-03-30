@@ -1,0 +1,62 @@
+/* Variables & reset */
+:root {
+    --bg-page:      #0d1117;
+    --bg-card:      #161b22;
+    --bg-header:    #0d1117;
+    --border-dim:   #30363d;
+
+    --text-primary:   #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted:     #484f58;
+
+    /* Couleurs température */
+    --color-blue:   #4672ff;
+    --color-green:  #3fb950;
+    --color-orange: #f0883e;
+    --color-red:    #f85149;
+
+    --color-accent: #58a6ff;
+
+    --font-display: 'Courier New', 'Lucida Console', monospace;
+    --font-body:    'Segoe UI', system-ui, sans-serif;
+
+    --radius-card: 12px;
+    --shadow-card: 0 4px 24px rgba(0, 0, 0, .45);
+
+    --transition: 200ms ease;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    line-height: 1.5;
+}
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1;
+}
+/* Responsive */
+@media (max-width: 600px) {
+    .header-inner { flex-direction: column; height: auto; padding: .75rem 1rem; }
+    .nav { justify-content: center; }
+    .capteur-valeur { font-size: 2.8rem; }
+    .main { padding: 1.25rem 1rem 3rem; }
+}
