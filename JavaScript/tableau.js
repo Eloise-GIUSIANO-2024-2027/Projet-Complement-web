@@ -31,6 +31,7 @@ const Model = (() => {
 
         EventEmitter.emit("sensorUpdated", { id, ...sensor });
     }
+
     function getAlertInfo(id, temp) {
         if (id === "int") {
             if (temp < 0)  return { cssClass: "style-blue",   alerte: "Canalisations gelées, appelez SOS plombier et mettez un bonnet !", critique: true };
@@ -158,6 +159,7 @@ const View = (() => {
 
     return { setWsStatus, renderSensor, showAlertDialog, initTabs, initAlertClose };
 })();
+
 const Controller = (() => {
     const WS_URL = "wss://ws.hothothot.dog:9502";
     const RECONNECT_DELAY_MS = 5000;
@@ -178,15 +180,11 @@ const Controller = (() => {
         try {
             const parsed = JSON.parse(rawData);
 
-            if (parsed.int !== undefined && parsed.ext !== undefined) {
-                Model.updateTemp("int", Number(parsed.int));
-                Model.updateTemp("ext", Number(parsed.ext));
-                return;
-            }
-
-            if (parsed.sensor && parsed.value !== undefined) {
-                const id = parsed.sensor === "int" || parsed.sensor === "interieur" ? "int" : "ext";
-                Model.updateTemp(id, Number(parsed.value));
+            if (parsed.capteurs && Array.isArray(parsed.capteurs)) {
+                parsed.capteurs.forEach(capteur => {
+                    const id = capteur.Nom === "interieur" ? "int" : "ext";
+                    Model.updateTemp(id, Number(capteur.Valeur));
+                });
                 return;
             }
 
@@ -203,6 +201,7 @@ const Controller = (() => {
 
         _ws.addEventListener("open", () => {
             View.setWsStatus("connected");
+            _ws.send("hello");
         });
 
         _ws.addEventListener("message", (event) => {
@@ -228,6 +227,7 @@ const Controller = (() => {
 
     return { init };
 })();
+
 const ctx = document.getElementById("tempChart").getContext("2d");
 
 const tempChart = new Chart(ctx, {
@@ -260,14 +260,15 @@ const tempChart = new Chart(ctx, {
         }
     }
 });
-function showHistory(previousValue)
-{
+
+function showHistory(previousValue) {
     const history = document.createElement("div");
-    history.textContent = "Jour " + (I_i - 1) + " : "  + previousValue + "°C";
+    history.textContent = "Jour " + (I_i - 1) + " : " + previousValue + "°C";
     tempPrec.appendChild(history);
 
     tempChart.data.labels.push("Jour " + (I_i - 1));
     tempChart.data.datasets[0].data.push(previousValue);
     tempChart.update();
 }
+
 document.addEventListener("DOMContentLoaded", () => Controller.init());
