@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HotHotHot – Tableau de bord</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4a90d9">
     <link rel="stylesheet" href="../CSS/style.css">
     <link rel="stylesheet" href="../CSS/theme.css">
     <link rel="stylesheet" href="../CSS/header.css">
@@ -20,9 +22,9 @@
             <span class="logo-text">HotHotHot</span>
         </div>
         <nav class="nav" aria-label="Navigation principale">
-            <a href="index.html" class="nav-link active" aria-current="page">Accueil</a>
-            <a href="doc.html" class="nav-link">Documentation</a>
-            <a href="compte.html" class="nav-link">Mon compte</a>
+            <a href="../HTML/index.html" class="nav-link active" aria-current="page">Accueil</a>
+            <a href="../HTML/documentation.html" class="nav-link">Documentation</a>
+            <a href="../HTML/compte.html" class="nav-link">Mon compte</a>
         </nav>
     </div>
 </header>
@@ -127,7 +129,12 @@
     <button id="alerteClose" class="alerte-dialog-close" autofocus>Fermer</button>
 </dialog>
 
-<script src="../JavaScript/tableau.js"></script>
+<script src="/JavaScript/eventEmitter.js"></script>
+<script src="/JavaScript/model.js"></script>
+<script src="/JavaScript/view.js"></script>
+<script src="/JavaScript/historique.js"></script>
+<script src="/JavaScript/controller.js"></script>
+<script src="/JavaScript/pwa.js"></script>
 
 <footer>
     <div class="footer-grid">

@@ -1,0 +1,23 @@
+{
+  "name": "HotHotHot – Tableau de bord",
+  "short_name": "HotHotHot",
+  "description": "Surveillance des températures intérieure et extérieure en temps réel",
+  "start_url": "/HTML/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4a90d9",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "/Icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/Icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
