@@ -1,22 +1,16 @@
 "use strict";
 
-const tempPrec = document.getElementById("zoneValPrec");
-const canvasInt = document.getElementById("tempChartInt");
-const canvasExt = document.getElementById("tempChartExt");
-
 const MAX_POINTS = 45;
 const dataInt = [];
 const dataExt = [];
 
 const EventEmitter = (() => {
     const _listeners = {};
-
     return {
         on(event, callback) {
             if (!_listeners[event]) _listeners[event] = [];
             _listeners[event].push(callback);
         },
-
         emit(event, data) {
             (_listeners[event] || []).forEach(cb => cb(data));
         },
@@ -68,33 +62,27 @@ const View = (() => {
     const _els = {
         wsStatus:    document.getElementById("wsStatus"),
         wsStatusDot: document.getElementById("wsStatusDot"),
-
-        tempInt:    document.getElementById("temp-int"),
-        tempExt:    document.getElementById("temp-ext"),
-
-        minmaxInt:  document.getElementById("minmax-int"),
-        minmaxExt:  document.getElementById("minmax-ext"),
-
-        commentInt: document.getElementById("comment-int"),
-        commentExt: document.getElementById("comment-ext"),
-
-        capteurInt: document.getElementById("capteur-int"),
-        capteurExt: document.getElementById("capteur-ext"),
-
+        tempInt:     document.getElementById("temp-int"),
+        tempExt:     document.getElementById("temp-ext"),
+        minmaxInt:   document.getElementById("minmax-int"),
+        minmaxExt:   document.getElementById("minmax-ext"),
+        commentInt:  document.getElementById("comment-int"),
+        commentExt:  document.getElementById("comment-ext"),
+        capteurInt:  document.getElementById("capteur-int"),
+        capteurExt:  document.getElementById("capteur-ext"),
         alerteDialog:  document.getElementById("alerteDialog"),
         alerteMessage: document.getElementById("alerteMessage"),
         alerteClose:   document.getElementById("alerteClose"),
-
-        btnJour: document.getElementById("btnJour"),
-        btnHist: document.getElementById("btnHist"),
+        btnJour:  document.getElementById("btnJour"),
+        btnHist:  document.getElementById("btnHist"),
         pageJour: document.getElementById("pageJour"),
         pageHist: document.getElementById("pageHist"),
+        btnNotif: document.getElementById("btnNotif"),
     };
 
     function setWsStatus(status) {
         const dotEl  = _els.wsStatusDot;
         const textEl = _els.wsStatus;
-
         dotEl.className = "ws-dot";
 
         switch (status) {
@@ -160,7 +148,6 @@ const View = (() => {
         _els.btnJour.addEventListener("click", () =>
             activate(_els.btnJour, _els.pageJour, _els.btnHist, _els.pageHist)
         );
-
         _els.btnHist.addEventListener("click", () =>
             activate(_els.btnHist, _els.pageHist, _els.btnJour, _els.pageJour)
         );
@@ -172,7 +159,23 @@ const View = (() => {
         });
     }
 
-    return { setWsStatus, renderSensor, showAlertDialog, initTabs, initAlertClose };
+    function initNotifButton(onGranted) {
+        const btn = _els.btnNotif;
+        if (!btn) return;
+
+        btn.addEventListener("click", async () => {
+            const permission = await Notification.requestPermission();
+            if (permission === "granted") {
+                btn.textContent = "✅ Notifications activées";
+                btn.disabled = true;
+                if (typeof onGranted === "function") onGranted();
+            } else {
+                btn.textContent = "🚫 Notifications refusées";
+            }
+        });
+    }
+
+    return { setWsStatus, renderSensor, showAlertDialog, initTabs, initAlertClose, initNotifButton };
 })();
 
 const _makeChartConfig = (label, color) => ({
@@ -194,27 +197,14 @@ const _makeChartConfig = (label, color) => ({
         responsive: false,
         animation: false,
         scales: {
-            y: {
-                min: -10,
-                max: 40,
-                title: { display: true, text: "°C" }
-            },
-            x: {
-                title: { display: true, text: "Mesure" }
-            }
+            y: { min: -10, max: 40, title: { display: true, text: "°C" } },
+            x: { title: { display: true, text: "Mesure" } }
         }
     }
 });
 
-const tempChartInt = new Chart(
-    canvasInt.getContext("2d"),
-    _makeChartConfig("Intérieur (°C)", "rgb(74, 144, 217)")
-);
-
-const tempChartExt = new Chart(
-    canvasExt.getContext("2d"),
-    _makeChartConfig("Extérieur (°C)", "rgb(217, 107, 74)")
-);
+let tempChartInt;
+let tempChartExt;
 
 const Controller = (() => {
     const WS_URL = "wss://ws.hothothot.dog:9502";
@@ -230,7 +220,7 @@ const Controller = (() => {
                 View.showAlertDialog(alertInfo.alerte);
             }
 
-            const arr    = id === "int" ? dataInt : dataExt;
+            const arr    = id === "int" ? dataInt    : dataExt;
             const chart  = id === "int" ? tempChartInt : tempChartExt;
             const labels = Array.from({ length: arr.length }, (_, i) => i + 1);
 
@@ -260,22 +250,18 @@ const Controller = (() => {
 
     function _connect() {
         View.setWsStatus("connecting");
-
         _ws = new WebSocket(WS_URL);
 
         _ws.addEventListener("open", () => {
             View.setWsStatus("connected");
             _ws.send("hello");
         });
-
         _ws.addEventListener("message", (event) => {
             _handleMessage(event.data);
         });
-
         _ws.addEventListener("error", () => {
             View.setWsStatus("error");
         });
-
         _ws.addEventListener("close", () => {
             View.setWsStatus("closed");
             setTimeout(_connect, RECONNECT_DELAY_MS);
@@ -286,16 +272,48 @@ const Controller = (() => {
         _initObservers();
         View.initTabs();
         View.initAlertClose();
+        View.initNotifButton(async () => {
+            try {
+                const registration = await navigator.serviceWorker.ready;
+
+                const subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array("BPETgmQ0z0VFh-CS5Bzvq3vPfxr5wVyX2yJzSzsKlRwegoBTe5I1Y3zscqbUOaBB9WROACdeYy20ogA8u1LF7b4")
+                });
+
+                await fetch("/api/subscribe", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(subscription)
+                });
+
+                console.log("Abonnement push enregistré :", subscription);
+            } catch (err) {
+                console.error("Erreur abonnement push :", err);
+            }
+        });
         _connect();
     }
 
     return { init };
 })();
 
-function showHistory(previousValue) {
-    const history = document.createElement("div");
-    history.textContent = "Jour " + (I_i - 1) + " : " + previousValue + "°C";
-    tempPrec.appendChild(history);
+function urlBase64ToUint8Array(base64String) {
+    const padding = "=".repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+    const rawData = atob(base64);
+    return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
 }
 
-document.addEventListener("DOMContentLoaded", () => Controller.init());
+document.addEventListener("DOMContentLoaded", () => {
+    tempChartInt = new Chart(
+        document.getElementById("tempChartInt").getContext("2d"),
+        _makeChartConfig("Intérieur (°C)", "rgb(74, 144, 217)")
+    );
+    tempChartExt = new Chart(
+        document.getElementById("tempChartExt").getContext("2d"),
+        _makeChartConfig("Extérieur (°C)", "rgb(217, 107, 74)")
+    );
+
+    Controller.init();
+});
