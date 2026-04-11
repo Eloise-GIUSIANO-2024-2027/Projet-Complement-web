@@ -59,11 +59,25 @@
     margin: 0;
 }
 
-#btnLogin, #btnLogout {
+#btnLogin {
     background: linear-gradient(135deg, #4a90d9, #357abd);
     width: auto;
     padding: 12px 40px;
-    color: #fff;
+    color: #000000;
+    border: none;
+    font-size: 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(74, 144, 217, 0.3);
+    margin-top: 4px;
+}
+
+#btnLogout {
+    background: linear-gradient(135deg, #4a90d9, #357abd);
+    width: auto;
+    padding: 12px 40px;
+    color: #ffffff;
     border: none;
     font-size: 1rem;
     border-radius: 10px;
