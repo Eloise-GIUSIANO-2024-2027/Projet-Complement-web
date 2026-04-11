@@ -1,10 +1,27 @@
+/**
+ * tableau.js
+ * Page principale de visualisation des données de température.
+ *
+ * Architecture MVC simplifiée :
+ *  - Model   : état des capteurs (temp, min, max) et historique des points de graphique.
+ *  - View    : mise à jour du DOM (cartes capteurs, statut WebSocket, onglets, dialog d'alerte).
+ *  - Controller : orchestration — connexion au SharedWorker (ou fallback WebSocket direct),
+ *                 traitement des messages, liaison Model ↔ View via EventEmitter.
+ *
+ * Dépendances :
+ *  - Chart.js  : rendu des graphiques de températures.
+ *  - iziToast  : notifications toast (via le module Notifications).
+ *  - SharedWorker ("/JavaScript/shared-worker.js") : connexion WebSocket partagée entre onglets.
+ */
 "use strict";
 
 const tempPrec = document.getElementById("zoneValPrec");
 const canvasInt = document.getElementById("tempChartInt");
 const canvasExt = document.getElementById("tempChartExt");
-
+/** Nombre maximum de points conservés dans l'historique des graphiques */
 const MAX_POINTS = 45;
+
+/** Tableaux glissants des températures pour les graphiques (FIFO, taille MAX_POINTS) */
 const dataInt = [];
 const dataExt = [];
 
@@ -12,11 +29,20 @@ const EventEmitter = (() => {
     const _listeners = {};
 
     return {
+        /**
+         * Abonne un callback à un événement.
+         * @param {string}   event    - Nom de l'événement.
+         * @param {Function} callback - Fonction appelée lors de l'émission.
+         */
         on(event, callback) {
             if (!_listeners[event]) _listeners[event] = [];
             _listeners[event].push(callback);
         },
-
+        /**
+         * Émet un événement et transmet les données à tous les abonnés.
+         * @param {string} event - Nom de l'événement.
+         * @param {*}      data  - Données passées aux callbacks.
+         */
         emit(event, data) {
             (_listeners[event] || []).forEach(cb => cb(data));
         },
@@ -24,11 +50,19 @@ const EventEmitter = (() => {
 })();
 
 const Model = (() => {
+    /** État interne par capteur : température courante, min et max de session */
     const _state = {
         int: { temp: null, min: null, max: null },
         ext: { temp: null, min: null, max: null },
     };
 
+    /**
+     * Met à jour la température d'un capteur, recalcule min/max
+     * et ajoute la valeur à l'historique du graphique.
+     * Émet l'événement "sensorUpdated" avec les données mises à jour.
+     * @param {"int"|"ext"} id   - Identifiant du capteur.
+     * @param {number}      temp - Nouvelle température.
+     */
     function updateTemp(id, temp) {
         const sensor = _state[id];
         sensor.temp = temp;
@@ -47,6 +81,13 @@ const Model = (() => {
         EventEmitter.emit("sensorUpdated", { id, ...sensor });
     }
 
+    /**
+     * Renvoie les informations d'alerte (classe CSS, texte, criticité)
+     * correspondant à la température d'un capteur.
+     * @param {"int"|"ext"} id   - Identifiant du capteur.
+     * @param {number}      temp - Température à évaluer.
+     * @returns {{ cssClass: string, alerte: string, critique: boolean }}
+     */
     function getAlertInfo(id, temp) {
         if (id === "int") {
             if (temp < 0)  return { cssClass: "style-blue",   alerte: "Canalisations gelées, appelez SOS plombier et mettez un bonnet !", critique: true };
@@ -65,6 +106,7 @@ const Model = (() => {
 })();
 
 const View = (() => {
+    /** Cache des références aux éléments DOM fréquemment utilisés */
     const _els = {
         wsStatus:    document.getElementById("wsStatus"),
         wsStatusDot: document.getElementById("wsStatusDot"),
@@ -91,6 +133,10 @@ const View = (() => {
         pageHist: document.getElementById("pageHist"),
     };
 
+    /**
+     * Met à jour la pastille et le texte de statut de la connexion WebSocket.
+     * @param {"connecting"|"connected"|"error"|"closed"} status
+     */
     function setWsStatus(status) {
         const dotEl  = _els.wsStatusDot;
         const textEl = _els.wsStatus;
@@ -116,7 +162,11 @@ const View = (() => {
                 break;
         }
     }
-
+    /**
+     * Met à jour l'affichage d'une carte capteur (température, min/max, classe CSS, alerte).
+     * @param {{ id: string, temp: number, min: number, max: number }} data
+     * @param {{ cssClass: string, alerte: string, critique: boolean }} alertInfo
+     */
     function renderSensor(data, alertInfo) {
         const { id, temp, min, max } = data;
         const { cssClass, alerte, critique } = alertInfo;
@@ -138,13 +188,27 @@ const View = (() => {
         commentEl.textContent = alerte;
         commentEl.className = "capteur-alerte" + (critique ? " alerte-critique" : "");
     }
-
+    /**
+     * Affiche une alerte critique dans le dialog modal natif.
+     * @param {string} message - Message à afficher.
+     */
     function showAlertDialog(message) {
         _els.alerteMessage.textContent = message;
         _els.alerteDialog.showModal();
     }
-
+    /**
+     * Initialise la navigation par onglets (Aujourd'hui / Historique).
+     * Redimensionne les graphiques Chart.js lors du passage sur l'onglet historique
+     * pour éviter les problèmes de rendu sur canvas caché.
+     */
     function initTabs() {
+        /**
+         * Active un onglet et masque l'autre.
+         * @param {Element} btnActive   - Bouton à activer.
+         * @param {Element} panelActive - Panneau à afficher.
+         * @param {Element} btnOther    - Bouton à désactiver.
+         * @param {Element} panelOther  - Panneau à masquer.
+         */
         function activate(btnActive, panelActive, btnOther, panelOther) {
             btnActive.setAttribute("aria-selected", "true");
             btnActive.classList.add("tab-btn--active");
@@ -168,6 +232,7 @@ const View = (() => {
         });
     }
 
+    /** Initialise le bouton de fermeture du dialog d'alerte critique */
     function initAlertClose() {
         _els.alerteClose.addEventListener("click", () => {
             _els.alerteDialog.close();
@@ -176,7 +241,12 @@ const View = (() => {
 
     return { setWsStatus, renderSensor, showAlertDialog, initTabs, initAlertClose };
 })();
-
+/**
+ * Génère la configuration Chart.js pour un graphique linéaire de température.
+ * @param {string} label - Légende du dataset.
+ * @param {string} color - Couleur principale au format "rgb(r, g, b)".
+ * @returns {object} Configuration Chart.js complète.
+ */
 const _makeChartConfig = (label, color) => ({
     type: "line",
     data: {
@@ -209,17 +279,25 @@ const _makeChartConfig = (label, color) => ({
     }
 });
 
+/** Graphique des températures intérieures (bleu) */
 const tempChartInt = new Chart(
     canvasInt.getContext("2d"),
     _makeChartConfig("Intérieur (°C)", "rgb(74, 144, 217)")
 );
 
+/** Graphique des températures extérieures (orange) */
 const tempChartExt = new Chart(
     canvasExt.getContext("2d"),
     _makeChartConfig("Extérieur (°C)", "rgb(217, 107, 74)")
 );
 
 const Controller = (() => {
+    /**
+     * Traite une trame de données capteurs reçue (WebSocket ou SharedWorker).
+     * Met à jour le Model et sauvegarde les données dans localStorage
+     * pour restauration au prochain chargement.
+     * @param {{ capteurs: Array<{ Nom: string, Valeur: string }> }} parsed
+     */
     function _onSensorData(parsed) {
         if (!parsed.capteurs || !Array.isArray(parsed.capteurs)) return;
         parsed.capteurs.forEach(capteur => {
@@ -229,7 +307,10 @@ const Controller = (() => {
 
         localStorage.setItem("hhh_last_data", JSON.stringify(parsed));
     }
-
+    /**
+     * Abonne la View aux événements du Model via l'EventEmitter.
+     * À chaque mise à jour d'un capteur, met à jour la carte et le graphique correspondant.
+     */
     function _initObservers() {
         EventEmitter.on("sensorUpdated", ({ id, temp, min, max }) => {
             const alertInfo = Model.getAlertInfo(id, temp);
@@ -244,7 +325,11 @@ const Controller = (() => {
             chart.update();
         });
     }
-
+    /**
+     * Connexion via SharedWorker (stratégie préférée).
+     * Le SharedWorker maintient une seule connexion WebSocket partagée entre tous les onglets.
+     * Bascule en connexion directe si les SharedWorkers ne sont pas supportés.
+     */
     function _connectViaSharedWorker() {
         if (!("SharedWorker" in window)) {
             console.warn("SharedWorker non supporté, connexion directe.");
@@ -266,7 +351,10 @@ const Controller = (() => {
             }
         });
     }
-
+    /**
+     * Connexion WebSocket directe — fallback si SharedWorker indisponible.
+     * Reconnexion automatique après RECONNECT_DELAY_MS en cas de fermeture.
+     */
     function _connectDirect() {
         const WS_URL = "wss://ws.hothothot.dog:9502";
         const RECONNECT_DELAY_MS = 5000;
@@ -287,6 +375,13 @@ const Controller = (() => {
         ws.addEventListener("close", () => { View.setWsStatus("closed"); setTimeout(_connectDirect, RECONNECT_DELAY_MS); });
     }
 
+    /**
+     * Initialise l'ensemble de la page :
+     *  1. Active les observateurs Model → View.
+     *  2. Initialise les onglets et le dialog d'alerte.
+     *  3. Restaure les dernières données depuis localStorage (affichage immédiat).
+     *  4. Lance la connexion au SharedWorker (ou fallback direct).
+     */
     function init() {
         _initObservers();
         View.initTabs();
@@ -310,7 +405,10 @@ const Controller = (() => {
 
     return { init };
 })();
-
+/**
+ * Affiche une entrée d'historique journalier dans la zone dédiée.
+ * @param {number} previousValue - Température du jour précédent.
+ */
 function showHistory(previousValue) {
     const history = document.createElement("div");
     history.textContent = "Jour " + (I_i - 1) + " : " + previousValue + "°C";
@@ -322,4 +420,5 @@ window.addEventListener("resize", () => {
     tempChartExt.resize();
 });
 
+/** Point d'entrée : initialisation du Controller après chargement complet du DOM */
 document.addEventListener("DOMContentLoaded", () => Controller.init());
