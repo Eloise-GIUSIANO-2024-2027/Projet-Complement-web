@@ -73,6 +73,21 @@
     margin-top: 4px;
 }
 
+#btnRegister {
+    background: transparent;
+    color: #4a90d9;
+    border: 1px solid #4a90d9;
+    padding: 12px 40px;
+    font-size: 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+#btnRegister:hover {
+    background: rgba(74, 144, 217, 0.1);
+}
+
 #btnLogout {
     background: linear-gradient(135deg, #4a90d9, #357abd);
     width: auto;
