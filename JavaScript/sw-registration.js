@@ -1,3 +1,5 @@
+"use strict";
+
 (async () => {
     if (!("serviceWorker" in navigator)) {
         console.warn("[SW] Les Service Workers ne sont pas supportés par ce navigateur.");
@@ -5,7 +7,7 @@
     }
 
     try {
-        const registration = await navigator.serviceWorker.register("../service-worker.js");
+        const registration = await navigator.serviceWorker.register("/service-worker.js");
 
         console.log("[SW] Service Worker enregistré avec succès. Scope :", registration.scope);
 
@@ -25,14 +27,28 @@
         navigator.serviceWorker.addEventListener("controllerchange", () => {
             if (!refreshing) {
                 refreshing = true;
-                console.log("[SW] Nouveau Service Worker actif – rechargement de la page.");
                 window.location.reload();
             }
         });
 
-        setInterval(() => {
-            registration.update();
-        }, 60_000);
+        setInterval(() => registration.update(), 60_000);
+
+        if (!("Notification" in window)) return;
+
+        let permission = Notification.permission;
+
+        if (permission === "default") {
+            permission = await Notification.requestPermission();
+        }
+
+        if (permission === "granted") {
+            const sw = await navigator.serviceWorker.ready;
+            sw.active?.postMessage("START_WS");
+
+            setInterval(() => {
+                sw.active?.postMessage("KEEP_ALIVE");
+            }, 15_000);
+        }
 
     } catch (err) {
         console.error("[SW] Échec de l'enregistrement du Service Worker :", err);

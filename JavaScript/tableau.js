@@ -217,23 +217,18 @@ const tempChartExt = new Chart(
 );
 
 const Controller = (() => {
-    const WS_URL = "wss://ws.hothothot.dog:9502";
-    const RECONNECT_DELAY_MS = 5000;
-    let _ws = null;
+    function _onSensorData(parsed) {
+        if (!parsed.capteurs || !Array.isArray(parsed.capteurs)) return;
+        parsed.capteurs.forEach(capteur => {
+            const id = capteur.Nom === "interieur" ? "int" : "ext";
+            Model.updateTemp(id, Number(capteur.Valeur));
+        });
+    }
 
     function _initObservers() {
         EventEmitter.on("sensorUpdated", ({ id, temp, min, max }) => {
             const alertInfo = Model.getAlertInfo(id, temp);
             View.renderSensor({ id, temp, min, max }, alertInfo);
-
-            if (alertInfo.alerte) {
-                iziToast[alertInfo.critique ? "error" : "warning"]({
-                    title: alertInfo.critique ? "Alerte critique" : "Attention",
-                    message: alertInfo.alerte,
-                    position: "topRight",
-                    timeout: 5000,
-                });
-            }
 
             const arr    = id === "int" ? dataInt : dataExt;
             const chart  = id === "int" ? tempChartInt : tempChartExt;
@@ -245,55 +240,49 @@ const Controller = (() => {
         });
     }
 
-    function _handleMessage(rawData) {
-        try {
-            const parsed = JSON.parse(rawData);
-
-            if (parsed.capteurs && Array.isArray(parsed.capteurs)) {
-                parsed.capteurs.forEach(capteur => {
-                    console.log("Nom reçu :", capteur.Nom);
-                    const id = capteur.Nom === "interieur" ? "int" : "ext";
-                    Model.updateTemp(id, Number(capteur.Valeur));
-                    console.log(`Donnée reçue pour ${capteur.Nom} -> assignée à l'ID : ${id}`);
-                });
-                return;
-            }
-
-            console.warn("HotHotHot – format de message inconnu :", parsed);
-        } catch (err) {
-            console.error("HotHotHot – erreur parsing WebSocket :", err, rawData);
+    function _connectViaSharedWorker() {
+        if (!("SharedWorker" in window)) {
+            console.warn("SharedWorker non supporté, connexion directe.");
+            _connectDirect();
+            return;
         }
+
+        const worker = new SharedWorker("/JavaScript/shared-worker.js");
+
+        worker.port.addEventListener("message", event => {
+            const { type, status, data } = event.data;
+            if (type === "WS_STATUS") View.setWsStatus(status);
+            if (type === "SENSOR_DATA") _onSensorData(data);
+        });
+
+        worker.port.start();
     }
 
-    function _connect() {
+    function _connectDirect() {
+        const WS_URL = "wss://ws.hothothot.dog:9502";
+        const RECONNECT_DELAY_MS = 5000;
+
         View.setWsStatus("connecting");
+        const ws = new WebSocket(WS_URL);
 
-        _ws = new WebSocket(WS_URL);
-
-        _ws.addEventListener("open", () => {
-            View.setWsStatus("connected");
-            _ws.send("hello");
+        ws.addEventListener("open", () => { View.setWsStatus("connected"); ws.send("hello"); });
+        ws.addEventListener("message", event => {
+            try {
+                const parsed = JSON.parse(event.data);
+                _onSensorData(parsed);
+            } catch (err) {
+                console.error("HotHotHot – erreur parsing :", err);
+            }
         });
-
-        _ws.addEventListener("message", (event) => {
-            _handleMessage(event.data);
-        });
-
-        _ws.addEventListener("error", () => {
-            View.setWsStatus("error");
-        });
-
-        _ws.addEventListener("close", () => {
-            View.setWsStatus("closed");
-            setTimeout(_connect, RECONNECT_DELAY_MS);
-        });
+        ws.addEventListener("error", () => View.setWsStatus("error"));
+        ws.addEventListener("close", () => { View.setWsStatus("closed"); setTimeout(_connectDirect, RECONNECT_DELAY_MS); });
     }
 
     function init() {
         _initObservers();
         View.initTabs();
         View.initAlertClose();
-        _connect();
+        _connectViaSharedWorker();
     }
 
     return { init };
