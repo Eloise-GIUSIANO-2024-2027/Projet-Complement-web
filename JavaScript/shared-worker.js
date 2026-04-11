@@ -36,7 +36,11 @@ function _broadcast(data) {
 }
 
 function _startPing() {
-    if (_pingTimer !== null) return;
+    if (_pingTimer !== null)
+    {
+        clearInterval(_pingTimer);
+        _pingTimer = null;
+    }
     _pingTimer = setInterval(() => {
         if (_ws && _ws.readyState === WebSocket.OPEN) {
             _ws.send("ping");

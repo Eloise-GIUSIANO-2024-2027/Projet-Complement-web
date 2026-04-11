@@ -27,8 +27,6 @@
             }
         });
 
-        setInterval(() => registration.update(), 60_000);
-
     } catch (err) {
         console.error("[SW] Échec de l'enregistrement :", err);
     }

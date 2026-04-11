@@ -44,28 +44,3 @@ const Notifications = (() => {
 
     return { afficher, info, succes, avertissement, erreur };
 })();
-
-
-if ("SharedWorker" in window) {
-    const _worker = new SharedWorker("/JavaScript/shared-worker.js");
-    const _port   = _worker.port;
-
-    _port.addEventListener("message", event => {
-        const { type, niveau, titre, message } = event.data;
-
-        if (type === "TEMP_ALERT") {
-            Notifications.afficher(niveau, message, titre);
-        }
-
-
-    });
-
-    _port.start();
-
-    window.SharedWorkerPort   = _port;
-    window.SharedWorkerInstance = _worker;
-
-    window.addEventListener("pagehide", () => {
-        _port.postMessage("DISCONNECT");
-    });
-}

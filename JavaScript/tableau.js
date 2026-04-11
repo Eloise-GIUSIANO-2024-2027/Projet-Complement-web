@@ -223,6 +223,8 @@ const Controller = (() => {
             const id = capteur.Nom === "interieur" ? "int" : "ext";
             Model.updateTemp(id, Number(capteur.Valeur));
         });
+
+        localStorage.setItem("hhh_last_data", JSON.stringify(parsed));
     }
 
     function _initObservers() {
@@ -250,6 +252,8 @@ const Controller = (() => {
 
         const worker = new SharedWorker("/JavaScript/shared-worker.js");
 
+        worker.port.start();
+
         worker.port.addEventListener("message", event => {
             const { type, status, data, niveau, titre, message } = event.data;
             if (type === "WS_STATUS")   View.setWsStatus(status);
@@ -258,8 +262,6 @@ const Controller = (() => {
                 Notifications.afficher(niveau, message, titre);
             }
         });
-
-        worker.port.start();
     }
 
     function _connectDirect() {
@@ -286,6 +288,20 @@ const Controller = (() => {
         _initObservers();
         View.initTabs();
         View.initAlertClose();
+
+        const lastData = localStorage.getItem("hhh_last_data");
+        if (lastData)
+        {
+            try
+            {
+                _onSensorData(JSON.parse(lastData));
+            }
+            catch (e)
+            {
+                console.warn("Impossible de restaurer les dernières valeurs.", e);
+            }
+        }
+
         _connectViaSharedWorker();
     }
 
