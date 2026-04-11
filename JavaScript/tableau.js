@@ -123,10 +123,10 @@ const View = (() => {
         const { id, temp, min, max } = data;
         const { cssClass, alerte, critique } = alertInfo;
 
-        const tempEl    = id === "int" ? _els.tempInt    : _els.tempExt;
-        const minmaxEl  = id === "int" ? _els.minmaxInt  : _els.minmaxExt;
+        const tempEl = id === "int" ? _els.tempInt    : _els.tempExt;
+        const minmaxEl = id === "int" ? _els.minmaxInt  : _els.minmaxExt;
         const commentEl = id === "int" ? _els.commentInt : _els.commentExt;
-        const cardEl    = id === "int" ? _els.capteurInt : _els.capteurExt;
+        const cardEl = id === "int" ? _els.capteurInt : _els.capteurExt;
 
         tempEl.textContent = temp.toFixed(1);
 
