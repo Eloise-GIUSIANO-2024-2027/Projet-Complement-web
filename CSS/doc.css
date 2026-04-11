@@ -23,6 +23,37 @@ body {
     padding: 2rem 1.5rem;
 }
 
+.doc-grid h1 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    color: #4a90d9;
+}
+
+.doc-grid h2 {
+    font-size: 1.2rem;
+    color: #4a90d9;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid #1e2d42;
+}
+
+.doc-grid h3 {
+    font-size: 1rem;
+    color: #8a9bb0;
+    margin-top: 1.25rem;
+    margin-bottom: 0.4rem;
+}
+
+.doc-grid p, .doc-grid div {
+    line-height: 1.75;
+    color: #c5d0de;
+}
+
+.doc-grid a {
+    color: #4a90d9;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
     .header-inner { flex-direction: column; height: auto; padding: .75rem 1rem; }
