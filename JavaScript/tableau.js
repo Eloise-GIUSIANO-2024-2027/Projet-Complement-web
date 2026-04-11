@@ -161,9 +161,11 @@ const View = (() => {
             activate(_els.btnJour, _els.pageJour, _els.btnHist, _els.pageHist)
         );
 
-        _els.btnHist.addEventListener("click", () =>
-            activate(_els.btnHist, _els.pageHist, _els.btnJour, _els.pageJour)
-        );
+        _els.btnHist.addEventListener("click", () => {
+            activate(_els.btnHist, _els.pageHist, _els.btnJour, _els.pageJour);
+            tempChartInt.resize();
+            tempChartExt.resize();
+        });
     }
 
     function initAlertClose() {
@@ -191,7 +193,8 @@ const _makeChartConfig = (label, color) => ({
         }]
     },
     options: {
-        responsive: false,
+        responsive: true,
+        maintainAspectRatio: true,
         animation: false,
         scales: {
             y: {
@@ -313,5 +316,10 @@ function showHistory(previousValue) {
     history.textContent = "Jour " + (I_i - 1) + " : " + previousValue + "°C";
     tempPrec.appendChild(history);
 }
+
+window.addEventListener("resize", () => {
+    tempChartInt.resize();
+    tempChartExt.resize();
+});
 
 document.addEventListener("DOMContentLoaded", () => Controller.init());

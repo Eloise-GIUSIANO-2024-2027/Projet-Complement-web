@@ -222,24 +222,23 @@ body {
     transition: opacity var(--transition);
 }
 
-.TABLEAU {
+.alerte-dialog-close:hover { opacity: .85; }
+
+.histGrid {
     display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 20px;
+    flex-direction: column;
+    gap: 24px;
     width: 100%;
 }
-.alerte-dialog-close:hover { opacity: .85; }
+
+.chartWrapper {
+    position: relative;
+    width: 100%;
+}
 
 @media (max-width: 600px) {
     .header-inner { flex-direction: column; height: auto; padding: .75rem 1rem; }
     .nav { justify-content: center; }
     .capteur-valeur { font-size: 2.8rem; }
     .main { padding: 1.25rem 1rem 3rem; }
-}
-
-@media (max-width: 768px) {
-    #pageHist > div {
-        flex-direction: column !important;
-    }
 }

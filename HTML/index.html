@@ -116,10 +116,14 @@
         <h2 class="panel-titre">Historique des températures sous forme de graphe</h2>
 
         <h3>Température des jours précédents :</h3>
-        <div style="display: flex; flex-direction: row; align-items: flex-start; gap: 40px;">
+        <div class="histGrid">
             <ul id="zoneValPrec" role="alert" aria-live="assertive"></ul>
-            <canvas id="tempChartInt" width="600" height="300"></canvas>
-            <canvas id="tempChartExt" width="600" height="300"></canvas>
+            <div class="chartWrapper">
+                <canvas id="tempChartInt"></canvas>
+            </div>
+            <div class="chartWrapper">
+                <canvas id="tempChartExt"></canvas>
+            </div>
         </div>
     </section>
 </main>
