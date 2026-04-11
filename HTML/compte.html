@@ -7,67 +7,73 @@
         <link rel="manifest" href="../manifest.json">
         <meta name="theme-color" content="#4a90d9">
 
-        <link rel="icon" href="../Icons/favicon.png" type="image/png">
-        <link rel="stylesheet" href="../CSS/compte.css">
-        <link rel="stylesheet" href="../CSS/header.css">
-        <link rel="stylesheet" href="../CSS/style.css">
-        <link rel="stylesheet" href="../CSS/footer.css">
-        <link rel="stylesheet" href="../CSS/theme.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/css/iziToast.min.css">
-    </head>
-    <body>
-        <header class="header">
-            <div class="header-inner">
-                <div class="logo">
-                    <span class="logo-text">HotHotHot</span>
-                </div>
-                <nav class="nav" aria-label="Navigation principale">
-                    <a href="../HTML/index.html" class="nav-link">Accueil</a>
-                    <a href="../HTML/doc.html" class="nav-link" aria-current="page">Documentation</a>
-                    <a href="../HTML/install.html" class="nav-link">Installation</a>
-                    <a href="../HTML/compte.html" class="nav-link active" aria-current="page">Mon compte</a>
-                </nav>
+    <link rel="icon" href="../Icons/favicon.png" type="image/png">
+    <link rel="stylesheet" href="../CSS/compte.css">
+    <link rel="stylesheet" href="../CSS/header.css">
+    <link rel="stylesheet" href="../CSS/style.css">
+    <link rel="stylesheet" href="../CSS/footer.css">
+    <link rel="stylesheet" href="../CSS/theme.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/css/iziToast.min.css">
+</head>
+<body>
+<a href="#main-content"
+   style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;background:#fff;color:#000;padding:8px 16px;z-index:9999;font-size:1rem;"
+   onfocus="this.style.left='0';this.style.width='auto';this.style.height='auto';"
+   onblur="this.style.left='-9999px';this.style.width='1px';this.style.height='1px';">
+    Aller au contenu principal
+</a>
+<header class="header" role="banner">
+    <div class="header-inner">
+        <div class="logo" role="img" aria-label="Logo HotHotHot">
+            <span class="logo-text" aria-hidden="true">HotHotHot</span>
+        </div>
+        <nav class="nav" aria-label="Navigation principale" role="navigation">
+            <a href="../HTML/index.html" class="nav-link">Accueil</a>
+            <a href="../HTML/doc.html" class="nav-link">Documentation</a>
+            <a href="../HTML/install.html" class="nav-link">Installation</a>
+            <a href="../HTML/compte.html" class="nav-link active" aria-current="page">Mon compte</a>
+        </nav>
+    </div>
+</header>
+
+<main id="main-content" class="main" role="main">
+    <div id="viewLogin" class="compte-card" role="region" aria-labelledby="login-heading">
+        <h1 id="login-heading" class="visually-hidden">Connexion à votre compte</h1>
+        <button id="btnLogin">Se connecter</button>
+        <button id="btnRegister">S'inscrire</button>
+    </div>
+
+    <div id="viewCompte" class="compteCard" style="display:none;" role="region" aria-labelledby="compte-nom">
+        <div class="compteAvatar" aria-hidden="true">O.G</div>
+        <h2 id="compte-nom">Olivier Gerard</h2>
+        <p class="compteEmail">olivier.gerard@hothothot.fr</p>
+        <button id="btnLogout">Se déconnecter</button>
+    </div>
+</main>
+
+<footer>
+    <div class="footer-grid">
+        <div class="footer-bottom">
+            <span>© 2026 HotHotHot — Fait avec <em>♥</em> pour la chaleur</span>
+            <div class="footer-links">
+                <a href="#">Confidentialité</a>
+                <a href="#">CGU</a>
             </div>
-        </header>
+        </div>
+    </div>
+</footer>
 
-        <main class="main">
-            <div id="viewLogin" class="compte-card">
-                <button id="btnLogin">Se connecter</button>
-                <button id="btnRegister">S'inscrire</button>
-            </div>
+<dialog id="alerteDialog" class="alerte-dialog" aria-modal="true" aria-labelledby="alerteTitre">
+    <h2 id="alerteTitre" class="alerte-dialog-titre">Alerte</h2>
+    <p id="alerteMessage" class="alerte-dialog-message"></p>
+    <button id="alerteClose" class="alerte-dialog-close" autofocus>Fermer</button>
+</dialog>
 
-            <div id="viewCompte" class="compteCard" style="display:none;">
-                <div class="compteAvatar">O.G</div>
-                <h2>Olivier Gerard</h2>
-                <p class="compteEmail">olivier.gerard@hothothot.fr</p>
-                <button id="btnLogout">Se déconnecter</button>
-            </div>
-
-        </main>
-
-        <footer>
-            <div class="footer-grid">
-                <div class="footer-bottom">
-                    <span>© 2026 HotHotHot — Fait avec <em>♥</em> pour la chaleur</span>
-                    <div class="footer-links">
-                        <a href="#">Confidentialité</a>
-                        <a href="#">CGU</a>
-                    </div>
-                </div>
-            </div>
-        </footer>
-
-        <dialog id="alerteDialog" class="alerte-dialog" aria-modal="true" aria-labelledby="alerteTitre">
-            <h2 id="alerteTitre" class="alerte-dialog-titre">Alerte</h2>
-            <p id="alerteMessage" class="alerte-dialog-message"></p>
-            <button id="alerteClose" class="alerte-dialog-close" autofocus>Fermer</button>
-        </dialog>
-
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/js/iziToast.min.js"></script>
-        <script src="../JavaScript/notifications.js"></script>
-        <script src="../JavaScript/sw-registration.js" defer></script>
-        <script src="../JavaScript/pwa.js"></script>
-        <script src="../JavaScript/nav.js"></script>
-        <script src="../JavaScript/compte.js"></script>
-    </body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/js/iziToast.min.js"></script>
+<script src="../JavaScript/notifications.js"></script>
+<script src="../JavaScript/sw-registration.js" defer></script>
+<script src="../JavaScript/pwa.js"></script>
+<script src="../JavaScript/nav.js"></script>
+<script src="../JavaScript/compte.js"></script>
+</body>
 </html>

@@ -13,25 +13,31 @@
 </head>
 <body>
 
-<header class="header">
+<a href="#main-content"
+   style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;background:#fff;color:#000;padding:8px 16px;z-index:9999;font-size:1rem;"
+   onfocus="this.style.left='0';this.style.width='auto';this.style.height='auto';"
+   onblur="this.style.left='-9999px';this.style.width='1px';this.style.height='1px';">
+    Aller au contenu principal
+</a>
+
+<header class="header" role="banner">
     <div class="header-inner">
-        <div class="logo">
-            <span class="logo-text">HotHotHot</span>
+        <div class="logo" role="img" aria-label="Logo HotHotHot">
+            <span class="logo-text" aria-hidden="true">HotHotHot</span>
         </div>
-        <nav class="nav" aria-label="Navigation principale">
+        <nav class="nav" aria-label="Navigation principale" role="navigation">
             <a href="../HTML/index.html" class="nav-link active" aria-current="page">Accueil</a>
             <a href="../HTML/doc.html" class="nav-link">Documentation</a>
             <a href="../HTML/install.html" class="nav-link">Installation</a>
             <a href="../HTML/compte.html" class="nav-link">Mon compte</a>
         </nav>
-        <button id="btnNotif" class="tab-btn">
-            🔔 Activer les notifications
+        <button id="btnNotif" class="tab-btn" aria-label="Activer les notifications push">
+            <span aria-hidden="true">🔔</span> Activer les notifications
         </button>
-
     </div>
 </header>
 
-<main class="main">
+<main id="main-content" class="main" role="main">
 
     <div class="tab-bar" role="tablist" aria-label="Navigation des vues">
         <button
@@ -119,10 +125,10 @@
         <div class="histGrid">
             <ul id="zoneValPrec" role="alert" aria-live="assertive"></ul>
             <div class="chartWrapper">
-                <canvas id="tempChartInt"></canvas>
+                <canvas id="tempChartInt" role="img" aria-label="Graphique de température intérieure"></canvas>
             </div>
             <div class="chartWrapper">
-                <canvas id="tempChartExt"></canvas>
+                <canvas id="tempChartExt" role="img" aria-label="Graphique de température extérieure"></canvas>
             </div>
         </div>
     </section>

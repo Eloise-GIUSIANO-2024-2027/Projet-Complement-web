@@ -9,17 +9,19 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/css/iziToast.min.css">
 </head>
 <body>
-<div class="icon">📡</div>
-<h1>Vous êtes hors ligne</h1>
-<p>
-    Impossible de charger cette page pour l'instant.<br>
-    Vérifiez votre connexion Internet et réessayez.
-</p>
-<p>
-    Les données en temps réel nécessitent une connexion,
-    mais les pages déjà visitées restent disponibles.
-</p>
-<button onclick="window.location.reload()">Réessayer</button>
+<main role="main" aria-labelledby="offline-heading">
+    <div class="icon" aria-hidden="true">📡</div>
+    <h1 id="offline-heading">Vous êtes hors ligne</h1>
+    <p>
+        Impossible de charger cette page pour l'instant.<br>
+        Vérifiez votre connexion Internet et réessayez.
+    </p>
+    <p>
+        Les données en temps réel nécessitent une connexion,
+        mais les pages déjà visitées restent disponibles.
+    </p>
+    <button onclick="window.location.reload()" aria-label="Réessayer de charger la page">Réessayer</button>
+</main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/js/iziToast.min.js"></script>
 <script src="../JavaScript/notifications.js"></script>

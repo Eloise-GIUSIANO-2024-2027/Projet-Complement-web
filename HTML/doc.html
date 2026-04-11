@@ -14,12 +14,18 @@
 </head>
 
 <body>
-<header class="header">
+<a href="#main-content"
+   style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;background:#fff;color:#000;padding:8px 16px;z-index:9999;font-size:1rem;"
+   onfocus="this.style.left='0';this.style.width='auto';this.style.height='auto';"
+   onblur="this.style.left='-9999px';this.style.width='1px';this.style.height='1px';">
+    Aller au contenu principal
+</a>
+<header class="header" role="banner">
     <div class="header-inner">
-        <div class="logo">
-            <span class="logo-text">HotHotHot</span>
+        <div class="logo" role="img" aria-label="Logo HotHotHot">
+            <span class="logo-text" aria-hidden="true">HotHotHot</span>
         </div>
-        <nav class="nav" aria-label="Navigation principale">
+        <nav class="nav" aria-label="Navigation principale" role="navigation">
             <a href="../HTML/index.html" class="nav-link">Accueil</a>
             <a href="../HTML/doc.html" class="nav-link active" aria-current="page">Documentation</a>
             <a href="../HTML/install.html" class="nav-link">Installation</a>
@@ -27,11 +33,11 @@
         </nav>
     </div>
 </header>
-<main>
-    <section class="doc-grid">
-        <h1>La Documentation</h1>
-        <div>
-            <h2>La Présentation de notre équipe</h2>
+<main id="main-content" role="main">
+    <section class="doc-grid" aria-labelledby="doc-title">
+        <h1 id="doc-title">La Documentation</h1>
+        <div aria-labelledby="team-heading">
+            <h2 id="team-heading">La Présentation de notre équipe</h2>
             Notre équipe est composé de Lou Decamps, Eloïse Giusiano et Oriane Mejean. Nous avons décidé de nous répartir le
             travail de façon équitable, Lou s'est donc occupé de l'affichage des données en temps reel, de la mise en place
             des notifications push, de la page d'accueil et du mode hors ligne (avec Oriane).
@@ -41,19 +47,19 @@
             et du mode hors ligne (avec Lou).
             Enfin, nous avons tous les trois participé à la création de la documentation.
         </div>
-        <div>
-            <h2>Outils utilisés et organisation</h2>
+        <div aria-labelledby="tools-heading">
+            <h2 id="tools-heading">Outils utilisés et organisation</h2>
 
-            <h3>Outils utiliser :</h3>
+            <h3 id="tools-list-heading">Outils utiliser :</h3>
             <p>
                 Nous avons utilisé GitHub pour la gestion de version et la gestion du projet.
                 Et nous avons utilisé PhpStorm pour coder. Ces 2 outils qui nous ont permis de travailler efficacement.
             </p>
             <p>
-                Voici le lien vers le GitHub du projet : <a href="https://github.com/Eloise-GIUSIANO-2024-2027/Projet-Complement-web.git">Github</a>
+                Voici le lien vers le GitHub du projet : <a href="https://github.com/Eloise-GIUSIANO-2024-2027/Projet-Complement-web.git" target="_blank" rel="noopener noreferrer" aria-label="Accéder au dépôt GitHub du projet (ouvre dans un nouvel onglet)">Github</a>
             </p>
 
-            <h3>Méthodologie :</h3>
+            <h3 id="methodology-heading">Méthodologie :</h3>
             <p>
                 Pour la réalisation de ce projet, nous avons utilisé une méthode agile.
                 Nous avons des sprints de 2 semaines, où nous nous sommes partagé les tâches à faire.
@@ -61,7 +67,7 @@
                 sur d'avoir un résultat final répondant au mieux aux attentes.
             </p>
 
-            <h2>Planning de réalisation :</h2>
+            <h2 id="planning-heading">Planning de réalisation :</h2>
             <p>
                 Nous avons commencé par reprendre la base qu'Oriane avait faite en cours. Puis nous avons essayé d'obtenir
                 le certificat HTTPS. Ayant quelque difficulté et par peur de perdre du temps, Lou et Eloïse ont commencé à travailler sur

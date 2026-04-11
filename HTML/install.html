@@ -16,25 +16,31 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/css/iziToast.min.css">
 </head>
 <body>
-<header class="header">
+<a href="#main-content"
+   style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;background:#fff;color:#000;padding:8px 16px;z-index:9999;font-size:1rem;"
+   onfocus="this.style.left='0';this.style.width='auto';this.style.height='auto';"
+   onblur="this.style.left='-9999px';this.style.width='1px';this.style.height='1px';">
+    Aller au contenu principal
+</a>
+<header class="header" role="banner">
     <div class="header-inner">
-        <div class="logo">
-            <span class="logo-text">HotHotHot</span>
+        <div class="logo" role="img" aria-label="Logo HotHotHot">
+            <span class="logo-text" aria-hidden="true">HotHotHot</span>
         </div>
-        <nav class="nav" aria-label="Navigation principale">
+        <nav class="nav" aria-label="Navigation principale" role="navigation">
             <a href="../HTML/index.html" class="nav-link">Accueil</a>
-            <a href="../HTML/doc.html" class="nav-link" aria-current="page">Documentation</a>
+            <a href="../HTML/doc.html" class="nav-link">Documentation</a>
             <a href="../HTML/install.html" class="nav-link active" aria-current="page">Installation</a>
             <a href="../HTML/compte.html" class="nav-link">Mon compte</a>
         </nav>
     </div>
 </header>
 
-<main class="main">
+<main id="main-content" class="main" role="main" aria-labelledby="install-heading">
     <div class="install-top">
-        <img src="../Icons/icon-512.png" alt="HotHotHot" id="appIcon">
+        <img src="../Icons/icon-512.png" alt="Icône de l'application HotHotHot" id="appIcon">
 
-        <h4>
+        <h4 id="install-heading">
             Vous pouvez emporter HotHotHot partout avec vous en l'installant directement sur votre
             appareil. Plus besoin d'ouvrir un navigateur : consultez la température en temps réel
             depuis votre écran d'accueil. Et même sans connexion, l'application continue de fonctionner,
@@ -43,8 +49,8 @@
         </h4>
     </div>
 
-    <button id="btnInstall">
-        <h4>
+    <button id="btnInstall" aria-label="Installer l'application HotHotHot sur votre appareil">
+        <h4 aria-hidden="true">
             Installer l'application
         </h4>
     </button>
