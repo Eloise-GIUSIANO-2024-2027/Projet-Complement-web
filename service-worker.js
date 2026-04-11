@@ -17,44 +17,11 @@ const FILES_TO_CACHE = [
     OFFLINE_URL
 ];
 
-self.addEventListener("push", (event) => {
-    let data = { title: "HotHotHot", body: "Nouvelle alerte !" };
-
-    if (event.data) {
-        try { data = event.data.json(); }
-        catch { data.body = event.data.text(); }
-    }
-
-    event.waitUntil(
-        self.registration.showNotification(data.title, {
-            body: data.body,
-            icon: "/Icons/icon-192.png",
-            badge: "/Icons/icon-192.png",
-            tag: "hothothot-alerte",
-        })
-    );
-});
-
-self.addEventListener("notificationclick", (event) => {
-    event.notification.close();
-    event.waitUntil(
-        clients.matchAll({ type: "window", includeUncontrolled: true })
-            .then((clientList) => {
-                for (const client of clientList) {
-                    if (client.url.includes("index.html") && "focus" in client) {
-                        return client.focus();
-                    }
-                }
-                return clients.openWindow("/HTML/index.html");
-            })
-    );
-});
-
 self.addEventListener("install", (event) => {
     console.log("[SW] Installation…");
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
-                return cache.addAll(FILES_TO_CACHE);
+            return cache.addAll(FILES_TO_CACHE);
         }).then(() => {
             console.log("[SW] Page offline mise en cache");
         }).catch((err) => {

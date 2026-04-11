@@ -1,111 +1,39 @@
 "use strict";
 
-window.addEventListener("DOMContentLoaded", async () => {
-
+window.addEventListener("DOMContentLoaded", () => {
     const btnInstall = document.getElementById("btnInstall");
-    if (btnInstall) {
+    if (!btnInstall) return;
+
+    btnInstall.hidden = true;
+
+    let _deferredPrompt = null;
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        _deferredPrompt = e;
+        btnInstall.hidden = false;
+        console.log("Install disponible");
+    });
+
+    btnInstall.addEventListener("click", async () => {
+        if (!_deferredPrompt) return;
+
         btnInstall.hidden = true;
-        let _deferredPrompt = null;
+        _deferredPrompt.prompt();
 
-        window.addEventListener("beforeinstallprompt", (e) => {
-            e.preventDefault();
-            _deferredPrompt = e;
-            btnInstall.hidden = false;
-        });
-
-        btnInstall.addEventListener("click", async () => {
-            if (!_deferredPrompt) return;
-            btnInstall.hidden = true;
-            _deferredPrompt.prompt();
-            const { outcome } = await _deferredPrompt.userChoice;
-            console.log("HotHotHot – installation :", outcome);
-            _deferredPrompt = null;
-        });
-
-        window.addEventListener("appinstalled", () => {
-            btnInstall.hidden = true;
-        });
-    }
-
-    if (!("serviceWorker" in navigator)) {
-        console.warn("Service Worker non supporté");
-        return;
-    }
-
-    const registration = await navigator.serviceWorker.register("/service-worker.js");
-    console.log("HotHotHot – Service Worker enregistré");
-
-    if (!("PushManager" in window)) {
-        console.warn("Push non supporté par ce navigateur");
-        return;
-    }
-
-    let vapidPublicKey;
-    try {
-        const res  = await fetch("/vapidPublicKey");
-        const data = await res.json();
-        vapidPublicKey = data.key;
-    } catch (e) {
-        console.error("Impossible de récupérer la clé VAPID :", e);
-        return;
-    }
-
-    const btnNotif = document.getElementById("btnNotif");
-    if (!btnNotif) return;
-
-    const existingSub = await registration.pushManager.getSubscription();
-    if (existingSub) {
-        btnNotif.hidden = true;
-        return;
-    }
-
-    btnNotif.addEventListener("click", async () => {
-        const permission = await Notification.requestPermission();
-        if (permission !== "granted") {
-            alert("Permission refusée, les notifications sont désactivées.");
-            return;
-        }
-
-        let subscription = await registration.pushManager.getSubscription();
-        if (!subscription) {
-            subscription = await registration.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
-            });
-        }
-
-        await fetch("/subscribe", {
-            method:  "POST",
-            headers: { "Content-Type": "application/json" },
-            body:    JSON.stringify(subscription),
-        });
-
-        btnNotif.hidden = true;
-        console.log("HotHotHot – abonnement push enregistré");
+        const { outcome } = await _deferredPrompt.userChoice;
+        console.log("HotHotHot – installation :", outcome);
+        _deferredPrompt = null;
     });
 
-    let subscription = await registration.pushManager.getSubscription();
-
-    if (!subscription) {
-        subscription = await registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
-        });
-        console.log("HotHotHot – abonnement push créé");
-    }
-
-    await fetch("/subscribe", {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify(subscription),
+    window.addEventListener("appinstalled", () => {
+        btnInstall.hidden = true;
+        console.log("HotHotHot – app installée");
     });
 
-    console.log("HotHotHot – abonnement push enregistré sur le serveur");
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/service-worker.js")
+            .then(() => console.log("HotHotHot – Service Worker enregistré"))
+            .catch(err => console.error("HotHotHot – Erreur SW :", err));
+    }
 });
-
-function urlBase64ToUint8Array(base64String) {
-    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-    const base64  = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
-    const raw     = atob(base64);
-    return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
-}
