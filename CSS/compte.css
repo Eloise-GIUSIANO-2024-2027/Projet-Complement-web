@@ -1,0 +1,108 @@
+.main.main {
+    flex-direction: column;
+    gap: 24px;
+    display: flex;
+    align-items: center;
+    min-height: 70vh;
+}
+
+.compteCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    background: #151c26;
+    border: 1px solid #1e2d42;
+    border-radius: 16px;
+    padding: 100px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.compteCard h2 {
+    font-size: 1.4rem;
+    color: #e0e6f0;
+    margin: 0;
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+}
+
+.inputGroup label {
+    font-size: 0.85rem;
+    color: #8a9bb0;
+}
+
+.inputGroup input {
+    background: #0f1620;
+    border: 1px solid #1e2d42;
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: #e0e6f0;
+    font-size: 1rem;
+    outline: none;
+    transition: border 0.2s;
+}
+
+.inputGroup input:focus {
+    border-color: #4a90d9;
+}
+
+.loginError {
+    color: #e05555;
+    font-size: 0.85rem;
+    min-height: 1em;
+    margin: 0;
+}
+
+#btnLogin, #btnLogout {
+    background: linear-gradient(135deg, #4a90d9, #357abd);
+    width: auto;
+    padding: 12px 40px;
+    color: #fff;
+    border: none;
+    font-size: 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(74, 144, 217, 0.3);
+    margin-top: 4px;
+}
+
+#btnLogin:hover, #btnLogout:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(74, 144, 217, 0.4);
+}
+
+#btnLogout {
+    background: linear-gradient(135deg, #c0392b, #962d22);
+    box-shadow: 0 4px 12px rgba(192, 57, 43, 0.3);
+    margin-top: 12px;
+}
+
+#btnLogout:hover {
+    box-shadow: 0 6px 18px rgba(192, 57, 43, 0.4);
+}
+
+.compteAvatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4a90d9, #357abd);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: #fff;
+}
+
+.compteEmail {
+    color: #8a9bb0;
+    font-size: 0.9rem;
+    margin: 0;
+}
