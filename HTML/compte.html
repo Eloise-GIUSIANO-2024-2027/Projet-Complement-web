@@ -1,38 +1,49 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HotHotHot – Mon compte</title>
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#4a90d9">
-    <link rel="stylesheet" href="/CSS/theme.css">
-    <link rel="stylesheet" href="/CSS/style.css">
-    <link rel="stylesheet" href="/CSS/compte.css">
-    <link rel="stylesheet" href="/CSS/header.css">
-    <link rel="stylesheet" href="/CSS/footer.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/css/iziToast.min.css">
-</head>
-<body>
-<header class="header">
-    <div class="header-inner">
-        <div class="logo">
-            <span class="logo-text">HotHotHot</span>
-        </div>
-        <nav class="nav" aria-label="Navigation principale">
-            <a href="../HTML/index.html" class="nav-link">Accueil</a>
-            <a href="../HTML/doc.html" class="nav-link">Documentation</a>
-            <a href="../HTML/install.html" class="nav-link">Installation</a>
-            <a href="../HTML/compte.html" class="nav-link active" aria-current="page">Mon compte</a>
-        </nav>
-    </div>
-</header>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>HotHotHot – Tableau de bord</title>
+        <link rel="manifest" href="../manifest.json">
+        <meta name="theme-color" content="#4a90d9">
 
-<main class="main">
-    <p>
-        {insérer texte}
-    </p>
-</main>
+        <link rel="icon" href="../Icons/favicon.png" type="image/png">
+        <link rel="stylesheet" href="../CSS/compte.css">
+        <link rel="stylesheet" href="../CSS/header.css">
+        <link rel="stylesheet" href="../CSS/style.css">
+        <link rel="stylesheet" href="../CSS/footer.css">
+        <link rel="stylesheet" href="../CSS/theme.css">
+    </head>
+    <body>
+        <header class="header">
+            <div class="header-inner">
+                <div class="logo">
+                    <span class="logo-text">HotHotHot</span>
+                </div>
+                <nav class="nav" aria-label="Navigation principale">
+                    <a href="../HTML/index.html" class="nav-link">Accueil</a>
+                    <a href="../HTML/doc.html" class="nav-link" aria-current="page">Documentation</a>
+                    <a href="../HTML/install.html" class="nav-link">Installation</a>
+                    <a href="../HTML/compte.html" class="nav-link active" aria-current="page">Mon compte</a>
+                </nav>
+            </div>
+        </header>
+
+        <main class="main">
+            <div id="viewLogin" class="compte-card">
+                <button id="btnLogin">Se connecter</button>
+                <button id="btnRegister">S'inscrire</button>
+            </div>
+
+            <div id="viewCompte" class="compteCard" style="display:none;">
+                <div class="compteAvatar">O.G</div>
+                <h2>Olivier Gerard</h2>
+                <p class="compteEmail">olivier.gerard@hothothot.fr</p>
+                <button id="btnLogout">Se déconnecter</button>
+            </div>
+
+        </main>
+
         <footer>
             <div class="footer-grid">
                 <div class="footer-bottom">
@@ -43,14 +54,19 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-</footer>
+        </footer>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/js/iziToast.min.js"></script>
-<script src="/JavaScript/notifications.js"></script>
-<script src="/JavaScript/pwa.js"></script>
-<script src="/JavaScript/nav.js"></script>
-<script src="/JavaScript/sw-registration.js" defer></script>
-</body>
+        <dialog id="alerteDialog" class="alerte-dialog" aria-modal="true" aria-labelledby="alerteTitre">
+            <h2 id="alerteTitre" class="alerte-dialog-titre">Alerte</h2>
+            <p id="alerteMessage" class="alerte-dialog-message"></p>
+            <button id="alerteClose" class="alerte-dialog-close" autofocus>Fermer</button>
+        </dialog>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+        <script src="../JavaScript/notifications.js"></script>
+        <script src="../JavaScript/tableau.js"></script>
+        <script src="../JavaScript/pwa.js"></script>
+        <script src="../JavaScript/nav.js"></script>
+        <script src="../JavaScript/compte.js"></script>
+    </body>
 </html>
