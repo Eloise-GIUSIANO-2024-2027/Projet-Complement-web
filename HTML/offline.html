@@ -6,6 +6,7 @@
     <title>HotHotHot – Hors ligne</title>
     <link rel="icon" href="../Icons/favicon.png" type="image/png">
     <link rel="stylesheet" href="../CSS/offline.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/css/iziToast.min.css">
 </head>
 <body>
 <div class="icon">📡</div>
@@ -19,5 +20,9 @@
     mais les pages déjà visitées restent disponibles.
 </p>
 <button onclick="window.location.reload()">Réessayer</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/js/iziToast.min.js"></script>
+<script src="../JavaScript/notifications.js"></script>
+<script src="../JavaScript/sw-registration.js" defer></script>
 </body>
 </html>
