@@ -247,12 +247,16 @@ const Controller = (() => {
             return;
         }
 
+
         const worker = new SharedWorker("/JavaScript/shared-worker.js");
 
         worker.port.addEventListener("message", event => {
-            const { type, status, data } = event.data;
-            if (type === "WS_STATUS") View.setWsStatus(status);
+            const { type, status, data, niveau, titre, message } = event.data;
+            if (type === "WS_STATUS")   View.setWsStatus(status);
             if (type === "SENSOR_DATA") _onSensorData(data);
+            if (type === "TEMP_ALERT" && typeof Notifications !== "undefined") {
+                Notifications.afficher(niveau, message, titre);
+            }
         });
 
         worker.port.start();

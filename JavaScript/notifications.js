@@ -11,7 +11,7 @@ const Notifications = (() => {
 
     function _check() {
         if (typeof iziToast === "undefined") {
-            console.warn("iziToast n'est pas chargé.");
+            console.warn("[Notifications] iziToast n'est pas chargé.");
             return false;
         }
         return true;
@@ -19,8 +19,7 @@ const Notifications = (() => {
 
     function afficher(niveau, message, titre) {
         if (!_check()) return;
-        const fn = niveau === "error" ? "error" : "warning";
-        iziToast[fn]({ ..._defaults, title: titre, message });
+        iziToast[niveau === "error" ? "error" : "warning"]({ ..._defaults, title: titre, message });
     }
 
     function info(message, titre = "Info") {
@@ -46,22 +45,27 @@ const Notifications = (() => {
     return { afficher, info, succes, avertissement, erreur };
 })();
 
-if ("SharedWorker" in window) {
-    const worker = new SharedWorker("/JavaScript/shared-worker.js");
 
-    worker.port.addEventListener("message", event => {
+if ("SharedWorker" in window) {
+    const _worker = new SharedWorker("/JavaScript/shared-worker.js");
+    const _port   = _worker.port;
+
+    _port.addEventListener("message", event => {
         const { type, niveau, titre, message } = event.data;
 
         if (type === "TEMP_ALERT") {
             Notifications.afficher(niveau, message, titre);
         }
+
+
     });
 
-    worker.port.start();
+    _port.start();
 
-    window.SharedWorkerPort = worker.port;
+    window.SharedWorkerPort   = _port;
+    window.SharedWorkerInstance = _worker;
 
     window.addEventListener("pagehide", () => {
-        worker.port.postMessage("DISCONNECT");
+        _port.postMessage("DISCONNECT");
     });
 }
