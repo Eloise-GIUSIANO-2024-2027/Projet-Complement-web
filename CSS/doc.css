@@ -54,6 +54,14 @@ body {
     color: #4a90d9;
 }
 
+p {
+    margin-bottom: 1.5rem;
+}
+
+p:last-child {
+    margin-bottom: 0;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
     .header-inner { flex-direction: column; height: auto; padding: .75rem 1rem; }
