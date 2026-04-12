@@ -189,7 +189,7 @@ function connecterWebSocket()
     });
 
     ws.on("error", err => {
-        console.error("[WS] Erreur :", err.message);
+        console.error("[WS] Erreur complète :", err);
         ws.terminate();
     });
 }
