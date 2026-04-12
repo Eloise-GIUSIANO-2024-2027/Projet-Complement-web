@@ -17,10 +17,10 @@ const PING_INTERVAL_MS   = 20_000;
 /**
  * Seuils d'alerte par capteur.
  * Chaque seuil définit :
- *  - test    : fonction qui renvoie true si la température déclenche l'alerte
- *  - tag     : identifiant interne
- *  - niveau  : "error" ou "warning"
- *  - titre   : titre affiché dans la notification
+ *  - test : fonction qui renvoie true si la température déclenche l'alerte
+ *  - tag : identifiant interne
+ *  - niveau : "error" ou "warning"
+ *  - titre : titre affiché dans la notification
  *  - message : message affiché dans la notification
  */
 const SEUILS = {
@@ -28,7 +28,7 @@ const SEUILS = {
         { test: t => t < 0,  tag: "int-gel",   niveau: "error",   titre: "Intérieur – Alerte critique", message: "Canalisations gelées, appelez SOS plombier et mettez un bonnet !" },
         { test: t => t < 12, tag: "int-froid", niveau: "warning", titre: "Intérieur – Attention",       message: "Montez le chauffage ou mettez un gros pull !" },
         { test: t => t > 50, tag: "int-feu",   niveau: "error",   titre: "Intérieur – Alerte critique", message: "Appelez les pompiers ou arrêtez votre barbecue !" },
-        { test: t => t > 22, tag: "int-chaud", niveau: "warning", titre: "Intérieur – Attention",       message: "Baissez le chauffage !" },
+        { test: t => t > 18, tag: "int-chaud", niveau: "warning", titre: "Intérieur – Attention",       message: "Baissez le chauffage !" },
     ],
     ext: [
         { test: t => t < 0,  tag: "ext-gel",   niveau: "error",   titre: "Extérieur – Alerte critique", message: "Banquise en vue !" },
