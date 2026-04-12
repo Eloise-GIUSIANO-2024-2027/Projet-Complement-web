@@ -79,18 +79,26 @@ function _startPing() {
  * Évalue la température d'un capteur par rapport aux seuils définis.
  * Diffuse une alerte si un seuil est dépassé, ou réinitialise l'alerte sinon.
  * @param {"int"|"ext"} id   - Identifiant du capteur.
- * @param {number}      temp - Température mesurée.
+ * @param {number} temp - Température mesurée.
  */
 function _evaluerTemp(id, temp) {
     for (const seuil of (SEUILS[id] ?? [])) {
         if (seuil.test(temp)) {
             _lastAlert[id] = { niveau: seuil.niveau, titre: seuil.titre, message: seuil.message };
             _broadcast({ type: "TEMP_ALERT", niveau: seuil.niveau, titre: seuil.titre, message: seuil.message });
+
+            fetch("https://hothothot-api.onrender.com/api/notify", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title: seuil.titre, body: seuil.message })
+            }).catch(err => console.error("[Push] Erreur envoi :", err));
+
             return;
         }
     }
     _lastAlert[id] = null;
 }
+
 /**
  * Traite un message brut reçu depuis la WebSocket.
  * Attend une structure JSON avec un tableau "capteurs".
