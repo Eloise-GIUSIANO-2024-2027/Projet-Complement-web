@@ -1,3 +1,21 @@
+/**
+ * serveurPush.js
+ * Serveur HTTP backend pour la gestion des notifications push Web.
+ *
+ * Rôle :
+ *  - Expose la clé publique VAPID au client via GET /vapidPublicKey.
+ *  - Reçoit et stocke les abonnements push des clients via POST /api/subscribe.
+ *  - Permet d'envoyer une notification push à tous les abonnés via POST /api/notify.
+ *
+ * Dépendances :
+ *  - web-push : envoi des notifications push via le protocole Web Push.
+ *  - dotenv : chargement des variables d'environnement (clés VAPID).
+ *
+ * Variables d'environnement requises :
+ *  - VAPID_PUBLIC_KEY : clé publique VAPID générée pour l'application.
+ *  - VAPID_PRIVATE_KEY : clé privée VAPID correspondante.
+ *  - PORT : port d'écoute du serveur.
+ */
 "use strict";
 
 const http = require("http");
@@ -10,14 +28,24 @@ const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
 const PORT = process.env.PORT || 8300;
 
+/**
+ * Configuration de web-push avec les clés VAPID.
+ * L'adresse mailto est obligatoire pour identifier le serveur émetteur.
+ */
 webPush.setVapidDetails(
     "mailto:contact@hothothot.fr",
     VAPID_PUBLIC_KEY,
     VAPID_PRIVATE_KEY
 );
 
+/** Liste des abonnements push actifs en mémoire */
 let subscriptions = [];
 
+/**
+ * Lit et parse le corps JSON d'une requête HTTP entrante.
+ * @param {http.IncomingMessage} req - La requête HTTP.
+ * @returns {Promise<object>} Le corps parsé en objet JavaScript.
+ */
 function parseBody(req)
 {
     return new Promise((resolve, reject) => {
@@ -30,6 +58,12 @@ function parseBody(req)
     });
 }
 
+/**
+ * Envoie une réponse JSON avec les headers CORS appropriés.
+ * @param {http.ServerResponse} res - La réponse HTTP.
+ * @param {number} status - Le code de statut HTTP.
+ * @param {object} obj - L'objet à sérialiser en JSON.
+ */
 function sendJson(res, status, obj)
 {
     res.writeHead(status, {
@@ -39,6 +73,12 @@ function sendJson(res, status, obj)
     res.end(JSON.stringify(obj));
 }
 
+/**
+ * Envoie une notification push à tous les abonnés enregistrés.
+ * Les abonnements invalides sont ignorés silencieusement.
+ * @param {string} title - Titre de la notification.
+ * @param {string} body - Corps du message de la notification.
+ */
 function broadcastPush(title, body)
 {
     const payload = JSON.stringify({ title, body });
@@ -51,9 +91,17 @@ function broadcastPush(title, body)
     });
 }
 
+/**
+ * Serveur HTTP principal.
+ * Routes disponibles :
+ *  - GET  /vapidPublicKey : retourne la clé publique VAPID.
+ *  - POST /api/subscribe : enregistre un nouvel abonnement push.
+ *  - POST /api/notify : envoie une notification à tous les abonnés.
+ */
 const server = http.createServer(async (req, res) => {
     const url = req.url.split("?")[0];
 
+    /** Gestion du preflight CORS pour les requêtes cross-origin */
     if (req.method === "OPTIONS")
     {
         res.writeHead(204, {
@@ -65,12 +113,14 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
+    /** Retourne la clé publique VAPID au client pour créer un abonnement push */
     if (req.method === "GET" && url === "/vapidPublicKey")
     {
         sendJson(res, 200, { key: VAPID_PUBLIC_KEY });
         return;
     }
 
+    /** Enregistre un nouvel abonnement push si non déjà connu */
     if (req.method === "POST" && url === "/api/subscribe")
     {
         try
@@ -95,6 +145,7 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
+    /** Déclenche l'envoi d'une notification push à tous les abonnés */
     if (req.method === "POST" && url === "/api/notify")
     {
         try
