@@ -3,7 +3,7 @@
  * Gestion de l'authentification côté client.
  * Utilise localStorage pour persister la session entre les rechargements de page.
  */
-const viewLogin  = document.getElementById("viewLogin");
+const viewLogin = document.getElementById("viewLogin");
 const viewCompte = document.getElementById("viewCompte");
 
 if (localStorage.getItem("hhh_login")) {

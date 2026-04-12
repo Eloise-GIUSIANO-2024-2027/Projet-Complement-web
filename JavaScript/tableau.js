@@ -3,14 +3,14 @@
  * Page principale de visualisation des données de température.
  *
  * Architecture MVC simplifiée :
- *  - Model   : état des capteurs (temp, min, max) et historique des points de graphique.
- *  - View    : mise à jour du DOM (cartes capteurs, statut WebSocket, onglets, dialog d'alerte).
+ *  - Model : état des capteurs (temp, min, max) et historique des points de graphique.
+ *  - View : mise à jour du DOM (cartes capteurs, statut WebSocket, onglets, dialog d'alerte).
  *  - Controller : orchestration — connexion au SharedWorker (ou fallback WebSocket direct),
  *                 traitement des messages, liaison Model ↔ View via EventEmitter.
  *
  * Dépendances :
- *  - Chart.js  : rendu des graphiques de températures.
- *  - iziToast  : notifications toast (via le module Notifications).
+ *  - Chart.js : rendu des graphiques de températures.
+ *  - iziToast : notifications toast (via le module Notifications).
  *  - SharedWorker ("/JavaScript/shared-worker.js") : connexion WebSocket partagée entre onglets.
  */
 "use strict";
@@ -41,7 +41,7 @@ const EventEmitter = (() => {
         /**
          * Émet un événement et transmet les données à tous les abonnés.
          * @param {string} event - Nom de l'événement.
-         * @param {*}      data  - Données passées aux callbacks.
+         * @param {*} data  - Données passées aux callbacks.
          */
         emit(event, data) {
             (_listeners[event] || []).forEach(cb => cb(data));
@@ -60,8 +60,8 @@ const Model = (() => {
      * Met à jour la température d'un capteur, recalcule min/max
      * et ajoute la valeur à l'historique du graphique.
      * Émet l'événement "sensorUpdated" avec les données mises à jour.
-     * @param {"int"|"ext"} id   - Identifiant du capteur.
-     * @param {number}      temp - Nouvelle température.
+     * @param {"int"|"ext"} id - Identifiant du capteur.
+     * @param {number} temp - Nouvelle température.
      */
     function updateTemp(id, temp) {
         const sensor = _state[id];
@@ -84,8 +84,8 @@ const Model = (() => {
     /**
      * Renvoie les informations d'alerte (classe CSS, texte, criticité)
      * correspondant à la température d'un capteur.
-     * @param {"int"|"ext"} id   - Identifiant du capteur.
-     * @param {number}      temp - Température à évaluer.
+     * @param {"int"|"ext"} id - Identifiant du capteur.
+     * @param {number} temp - Température à évaluer.
      * @returns {{ cssClass: string, alerte: string, critique: boolean }}
      */
     function getAlertInfo(id, temp) {
@@ -164,6 +164,7 @@ const View = (() => {
                 break;
         }
     }
+
     /**
      * Met à jour l'affichage d'une carte capteur (température, min/max, classe CSS, alerte).
      * @param {{ id: string, temp: number, min: number, max: number }} data
@@ -206,10 +207,10 @@ const View = (() => {
     function initTabs() {
         /**
          * Active un onglet et masque l'autre.
-         * @param {Element} btnActive   - Bouton à activer.
+         * @param {Element} btnActive - Bouton à activer.
          * @param {Element} panelActive - Panneau à afficher.
-         * @param {Element} btnOther    - Bouton à désactiver.
-         * @param {Element} panelOther  - Panneau à masquer.
+         * @param {Element} btnOther - Bouton à désactiver.
+         * @param {Element} panelOther - Panneau à masquer.
          */
         function activate(btnActive, panelActive, btnOther, panelOther) {
             btnActive.setAttribute("aria-selected", "true");
@@ -324,6 +325,7 @@ const Controller = (() => {
 
         localStorage.setItem("hhh_last_data", JSON.stringify(parsed));
     }
+
     /**
      * Abonne la View aux événements du Model via l'EventEmitter.
      * À chaque mise à jour d'un capteur, met à jour la carte et le graphique correspondant.
@@ -342,6 +344,7 @@ const Controller = (() => {
             chart.update();
         });
     }
+
     /**
      * Connexion via SharedWorker (stratégie préférée).
      * Le SharedWorker maintient une seule connexion WebSocket partagée entre tous les onglets.
@@ -368,6 +371,7 @@ const Controller = (() => {
             }
         });
     }
+
     /**
      * Connexion WebSocket directe — fallback si SharedWorker indisponible.
      * Reconnexion automatique après RECONNECT_DELAY_MS en cas de fermeture.
@@ -425,15 +429,6 @@ const Controller = (() => {
 
     return { init };
 })();
-/**
- * Affiche une entrée d'historique journalier dans la zone dédiée.
- * @param {number} previousValue - Température du jour précédent.
- */
-function showHistory(previousValue) {
-    const history = document.createElement("div");
-    history.textContent = "Jour " + (I_i - 1) + " : " + previousValue + "°C";
-    tempPrec.appendChild(history);
-}
 
 window.addEventListener("resize", () => {
     tempChartInt.resize();
