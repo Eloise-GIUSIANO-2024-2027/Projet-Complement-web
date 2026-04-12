@@ -108,14 +108,14 @@ const Model = (() => {
 const View = (() => {
     /** Cache des références aux éléments DOM fréquemment utilisés */
     const _els = {
-        wsStatus:    document.getElementById("wsStatus"),
+        wsStatus: document.getElementById("wsStatus"),
         wsStatusDot: document.getElementById("wsStatusDot"),
 
-        tempInt:    document.getElementById("temp-int"),
-        tempExt:    document.getElementById("temp-ext"),
+        tempInt: document.getElementById("temp-int"),
+        tempExt: document.getElementById("temp-ext"),
 
-        minmaxInt:  document.getElementById("minmax-int"),
-        minmaxExt:  document.getElementById("minmax-ext"),
+        minmaxInt: document.getElementById("minmax-int"),
+        minmaxExt: document.getElementById("minmax-ext"),
 
         commentInt: document.getElementById("comment-int"),
         commentExt: document.getElementById("comment-ext"),
@@ -123,14 +123,16 @@ const View = (() => {
         capteurInt: document.getElementById("capteur-int"),
         capteurExt: document.getElementById("capteur-ext"),
 
-        alerteDialog:  document.getElementById("alerteDialog"),
+        alerteDialog: document.getElementById("alerteDialog"),
         alerteMessage: document.getElementById("alerteMessage"),
-        alerteClose:   document.getElementById("alerteClose"),
+        alerteClose: document.getElementById("alerteClose"),
 
         btnJour: document.getElementById("btnJour"),
         btnHist: document.getElementById("btnHist"),
         pageJour: document.getElementById("pageJour"),
         pageHist: document.getElementById("pageHist"),
+
+        btnNotif: document.getElementById("btnNotif"),
     };
 
     /**
@@ -171,10 +173,10 @@ const View = (() => {
         const { id, temp, min, max } = data;
         const { cssClass, alerte, critique } = alertInfo;
 
-        const tempEl    = id === "int" ? _els.tempInt    : _els.tempExt;
-        const minmaxEl  = id === "int" ? _els.minmaxInt  : _els.minmaxExt;
+        const tempEl = id === "int" ? _els.tempInt    : _els.tempExt;
+        const minmaxEl = id === "int" ? _els.minmaxInt  : _els.minmaxExt;
         const commentEl = id === "int" ? _els.commentInt : _els.commentExt;
-        const cardEl    = id === "int" ? _els.capteurInt : _els.capteurExt;
+        const cardEl = id === "int" ? _els.capteurInt : _els.capteurExt;
 
         tempEl.textContent = temp.toFixed(1);
 
@@ -239,7 +241,22 @@ const View = (() => {
         });
     }
 
-    return { setWsStatus, renderSensor, showAlertDialog, initTabs, initAlertClose };
+    function initNotifButton(onGranted) {
+        const btn = _els.btnNotif;
+        if (!btn) return;
+        btn.addEventListener("click", async () => {
+            const permission = await Notification.requestPermission();
+            if (permission === "granted") {
+                btn.textContent = "✅ Notifications activées";
+                btn.disabled = true;
+                if (typeof onGranted === "function") onGranted();
+            } else {
+                btn.textContent = "🚫 Notifications refusées";
+            }
+        });
+    }
+
+    return { setWsStatus, renderSensor, showAlertDialog, initTabs, initAlertClose, initNotifButton };
 })();
 /**
  * Génère la configuration Chart.js pour un graphique linéaire de température.
@@ -386,6 +403,9 @@ const Controller = (() => {
         _initObservers();
         View.initTabs();
         View.initAlertClose();
+        View.initNotifButton(() => {
+            console.log("Notifications accordées !");
+        });
 
         const lastData = localStorage.getItem("hhh_last_data");
         if (lastData)
