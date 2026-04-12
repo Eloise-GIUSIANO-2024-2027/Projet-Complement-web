@@ -18,6 +18,7 @@
 const tempPrec = document.getElementById("zoneValPrec");
 const canvasInt = document.getElementById("tempChartInt");
 const canvasExt = document.getElementById("tempChartExt");
+
 /** Nombre maximum de points conservés dans l'historique des graphiques */
 const MAX_POINTS = 45;
 
@@ -31,7 +32,7 @@ const EventEmitter = (() => {
     return {
         /**
          * Abonne un callback à un événement.
-         * @param {string}   event    - Nom de l'événement.
+         * @param {string} event - Nom de l'événement.
          * @param {Function} callback - Fonction appelée lors de l'émission.
          */
         on(event, callback) {
@@ -41,7 +42,7 @@ const EventEmitter = (() => {
         /**
          * Émet un événement et transmet les données à tous les abonnés.
          * @param {string} event - Nom de l'événement.
-         * @param {*} data  - Données passées aux callbacks.
+         * @param {*} data - Données passées aux callbacks.
          */
         emit(event, data) {
             (_listeners[event] || []).forEach(cb => cb(data));
@@ -191,6 +192,7 @@ const View = (() => {
         commentEl.textContent = alerte;
         commentEl.className = "capteur-alerte" + (critique ? " alerte-critique" : "");
     }
+
     /**
      * Affiche une alerte critique dans le dialog modal natif.
      * @param {string} message - Message à afficher.
@@ -199,6 +201,7 @@ const View = (() => {
         _els.alerteMessage.textContent = message;
         _els.alerteDialog.showModal();
     }
+
     /**
      * Initialise la navigation par onglets (Aujourd'hui / Historique).
      * Redimensionne les graphiques Chart.js lors du passage sur l'onglet historique
@@ -242,6 +245,12 @@ const View = (() => {
         });
     }
 
+    /**
+     * Initialise le bouton d'activation des notifications.
+     * Demande la permission à l'utilisateur et met à jour le texte du bouton selon le résultat.
+     * Appelle le callback onGranted si la permission est accordée.
+     * @param {Function} onGranted - Callback appelé si la permission est accordée.
+     */
     function initNotifButton(onGranted) {
         const btn = _els.btnNotif;
         if (!btn) return;
@@ -259,6 +268,7 @@ const View = (() => {
 
     return { setWsStatus, renderSensor, showAlertDialog, initTabs, initAlertClose, initNotifButton };
 })();
+
 /**
  * Génère la configuration Chart.js pour un graphique linéaire de température.
  * @param {string} label - Légende du dataset.
@@ -399,7 +409,7 @@ const Controller = (() => {
     /**
      * Initialise l'ensemble de la page :
      *  1. Active les observateurs Model → View.
-     *  2. Initialise les onglets et le dialog d'alerte.
+     *  2. Initialise les onglets, le dialog d'alerte et le bouton notifications.
      *  3. Restaure les dernières données depuis localStorage (affichage immédiat).
      *  4. Lance la connexion au SharedWorker (ou fallback direct).
      */
@@ -430,6 +440,17 @@ const Controller = (() => {
     return { init };
 })();
 
+/**
+ * Ajoute une entrée d'historique dans la liste des valeurs précédentes.
+ * @param {number} previousValue - Température du jour précédent à afficher.
+ */
+function showHistory(previousValue) {
+    const history = document.createElement("div");
+    history.textContent = "Jour " + (I_i - 1) + " : " + previousValue + "°C";
+    tempPrec.appendChild(history);
+}
+
+/** Redimensionne les graphiques Chart.js lors du redimensionnement de la fenêtre */
 window.addEventListener("resize", () => {
     tempChartInt.resize();
     tempChartExt.resize();

@@ -2,10 +2,12 @@
  * pwa.js
  * Gestion de l'installation de l'application en mode PWA (Progressive Web App).
  * Affiche un bouton d'installation lorsque le navigateur déclenche l'événement
- * "beforeinstallprompt", et enregistre le Service Worker.
+ * "beforeinstallprompt", enregistre le Service Worker, et gère l'abonnement
+ * aux notifications push via l'API VAPID.
  */
 "use strict";
 
+/** URL de base de l'API backend hébergée sur Render */
 const API_URL = "https://hothothot-api.onrender.com";
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -28,6 +30,7 @@ window.addEventListener("DOMContentLoaded", () => {
         btnInstall.hidden = false;
         console.log("Install disponible");
     });
+
     /**
      * Au clic sur le bouton, on déclenche l'invite d'installation native
      * et on attend le choix de l'utilisateur.
@@ -50,20 +53,31 @@ window.addEventListener("DOMContentLoaded", () => {
         btnInstall.hidden = true;
         console.log("HotHotHot – app installée");
     });
+
     /**
      * Enregistrement du Service Worker pour la mise en cache et le fonctionnement hors-ligne.
      * Uniquement si l'API est supportée par le navigateur.
+     * Une fois enregistré, on initialise également l'abonnement aux notifications push.
      */
     if ("serviceWorker" in navigator) {
         navigator.serviceWorker.register("/service-worker.js")
             .then(async registration => {
                 console.log("HotHotHot – Service Worker enregistré");
 
+                /**
+                 * Vérifie que le navigateur supporte l'API Push.
+                 * Si ce n'est pas le cas, on arrête ici.
+                 * (clause de guard)
+                 */
                 if (!("PushManager" in window)) {
                     console.warn("Push non supporté par ce navigateur");
                     return;
                 }
 
+                /**
+                 * Récupère la clé publique VAPID depuis le serveur backend.
+                 * Cette clé est nécessaire pour créer un abonnement push sécurisé.
+                 */
                 let vapidPublicKey;
                 try {
                     const res  = await fetch(`${API_URL}/vapidPublicKey`);
@@ -74,6 +88,10 @@ window.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
 
+                /**
+                 * Si l'utilisateur est déjà abonné aux notifications push,
+                 * on cache le bouton de notification car il est inutile.
+                 */
                 const existingSub = await registration.pushManager.getSubscription();
                 if (existingSub) {
                     const btnNotif = document.getElementById("btnNotif");
@@ -84,6 +102,12 @@ window.addEventListener("DOMContentLoaded", () => {
                 const btnNotif = document.getElementById("btnNotif");
                 if (!btnNotif) return;
 
+                /**
+                 * Au clic sur le bouton de notification :
+                 * 1. On demande la permission à l'utilisateur
+                 * 2. On crée un abonnement push avec la clé VAPID
+                 * 3. On envoie cet abonnement au serveur pour qu'il puisse envoyer des notifications
+                 */
                 btnNotif.addEventListener("click", async () => {
                     const permission = await Notification.requestPermission();
                     if (permission !== "granted") {
@@ -113,6 +137,12 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 });
 
+/**
+ * Convertit une clé VAPID encodée en base64 URL-safe en Uint8Array.
+ * Nécessaire pour l'API PushManager.subscribe().
+ * @param {string} base64String - La clé publique VAPID en base64
+ * @returns {Uint8Array} - La clé convertie
+ */
 function urlBase64ToUint8Array(base64String) {
     const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
     const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
