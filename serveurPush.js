@@ -6,10 +6,13 @@
  *  - Expose la clé publique VAPID au client via GET /vapidPublicKey.
  *  - Reçoit et stocke les abonnements push des clients via POST /api/subscribe.
  *  - Permet d'envoyer une notification push à tous les abonnés via POST /api/notify.
+ *  - Se connecte au WebSocket des capteurs et envoie automatiquement des notifications
+ *    push lorsque la température dépasse les seuils définis.
  *
  * Dépendances :
  *  - web-push : envoi des notifications push via le protocole Web Push.
  *  - dotenv : chargement des variables d'environnement (clés VAPID).
+ *  - ws : client WebSocket pour la connexion aux capteurs.
  *
  * Variables d'environnement requises :
  *  - VAPID_PUBLIC_KEY : clé publique VAPID générée pour l'application.
@@ -21,12 +24,36 @@
 const http = require("http");
 const webPush = require("web-push");
 const dotenv = require("dotenv");
+const WebSocket = require("ws");
 
 dotenv.config();
 
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
 const PORT = process.env.PORT || 8300;
+
+/** URL du serveur WebSocket des capteurs de température */
+const WS_URL = "wss://ws.hothothot.dog:9502";
+
+/** Délai de reconnexion WebSocket en ms */
+const RECONNECT_DELAY_MS = 5000;
+
+/**
+ * Seuils d'alerte par capteur.
+ * Chaque seuil définit une condition, un titre et un message de notification.
+ */
+const SEUILS = {
+    int: [
+        { test: t => t < 0,  titre: "Intérieur – Alerte critique", message: "Canalisations gelées, appelez SOS plombier et mettez un bonnet !" },
+        { test: t => t < 12, titre: "Intérieur – Attention", message: "Montez le chauffage ou mettez un gros pull !" },
+        { test: t => t > 50, titre: "Intérieur – Alerte critique",  message: "Appelez les pompiers ou arrêtez votre barbecue !" },
+        { test: t => t > 22, titre: "Intérieur – Attention", message: "Baissez le chauffage !" },
+    ],
+    ext: [
+        { test: t => t < 0,  titre: "Extérieur – Alerte critique", message: "Banquise en vue !" },
+        { test: t => t > 35, titre: "Extérieur – Alerte critique", message: "Hot Hot Hot !" },
+    ],
+};
 
 /**
  * Configuration de web-push avec les clés VAPID.
@@ -40,6 +67,9 @@ webPush.setVapidDetails(
 
 /** Liste des abonnements push actifs en mémoire */
 let subscriptions = [];
+
+/** Dernières alertes envoyées par capteur pour éviter les doublons */
+const _lastAlert = { int: null, ext: null };
 
 /**
  * Lit et parse le corps JSON d'une requête HTTP entrante.
@@ -88,6 +118,79 @@ function broadcastPush(title, body)
                 console.error("[Push] Erreur :", err.statusCode);
             });
         return true;
+    });
+}
+
+/**
+ * Évalue la température d'un capteur et envoie une notification push
+ * si un seuil est dépassé et que l'alerte n'a pas déjà été envoyée.
+ * @param {"int"|"ext"} id - Identifiant du capteur.
+ * @param {number} temp - Température à évaluer.
+ */
+function evaluerTemp(id, temp)
+{
+    for (const seuil of (SEUILS[id] ?? []))
+    {
+        if (seuil.test(temp))
+        {
+            if (_lastAlert[id] === seuil.titre)
+            {
+                return;
+            }
+
+            _lastAlert[id] = seuil.titre;
+            console.log(`[Push] Alerte ${id} : ${seuil.titre}`);
+            broadcastPush(seuil.titre, seuil.message);
+            return;
+        }
+    }
+
+    _lastAlert[id] = null;
+}
+
+/**
+ * Connexion au WebSocket des capteurs avec reconnexion automatique.
+ * Parse les trames reçues et évalue les températures pour déclencher les alertes.
+ */
+function connecterWebSocket()
+{
+    console.log("[WS] Connexion à", WS_URL);
+    const ws = new WebSocket(WS_URL);
+
+    ws.on("open", () => {
+        console.log("[WS] Connecté aux capteurs");
+        ws.send("hello");
+    });
+
+    ws.on("message", data => {
+        try
+        {
+            const parsed = JSON.parse(data);
+            if (!parsed.capteurs || !Array.isArray(parsed.capteurs))
+            {
+                return;
+            }
+
+            parsed.capteurs.forEach(capteur => {
+                const id   = capteur.Nom === "interieur" ? "int" : "ext";
+                const temp = Number(capteur.Valeur);
+                evaluerTemp(id, temp);
+            });
+        }
+        catch (err)
+        {
+            console.error("[WS] Erreur parsing :", err);
+        }
+    });
+
+    ws.on("close", () => {
+        console.log(`[WS] Connexion fermée, reconnexion dans ${RECONNECT_DELAY_MS / 1000}s…`);
+        setTimeout(connecterWebSocket, RECONNECT_DELAY_MS);
+    });
+
+    ws.on("error", err => {
+        console.error("[WS] Erreur :", err.message);
+        ws.terminate();
     });
 }
 
@@ -165,6 +268,9 @@ const server = http.createServer(async (req, res) => {
     res.end("Route non trouvée");
 });
 
-server.listen(PORT, () => console.log(`[HotHotHot] Serveur démarré sur le port ${PORT}`));
+server.listen(PORT, () => {
+    console.log(`[HotHotHot] Serveur démarré sur le port ${PORT}`);
+    connecterWebSocket();
+});
 
 module.exports = { broadcastPush };
