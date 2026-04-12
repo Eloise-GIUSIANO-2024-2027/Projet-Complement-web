@@ -26,9 +26,9 @@ const PING_INTERVAL_MS   = 20_000;
 const SEUILS = {
     int: [
         { test: t => t < 0,  tag: "int-gel",   niveau: "error",   titre: "Intérieur – Alerte critique", message: "Canalisations gelées, appelez SOS plombier et mettez un bonnet !" },
-        { test: t => t < 12, tag: "int-froid", niveau: "warning", titre: "Intérieur – Attention",       message: "Montez le chauffage ou mettez un gros pull !" },
+        { test: t => t < 12, tag: "int-froid", niveau: "warning", titre: "Intérieur – Attention", message: "Montez le chauffage ou mettez un gros pull !" },
         { test: t => t > 50, tag: "int-feu",   niveau: "error",   titre: "Intérieur – Alerte critique", message: "Appelez les pompiers ou arrêtez votre barbecue !" },
-        { test: t => t > 18, tag: "int-chaud", niveau: "warning", titre: "Intérieur – Attention",       message: "Baissez le chauffage !" },
+        { test: t => t > 22, tag: "int-chaud", niveau: "warning", titre: "Intérieur – Attention", message: "Baissez le chauffage !" },
     ],
     ext: [
         { test: t => t < 0,  tag: "ext-gel",   niveau: "error",   titre: "Extérieur – Alerte critique", message: "Banquise en vue !" },
