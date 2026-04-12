@@ -321,7 +321,7 @@ const tempChartExt = new Chart(
 
 const Controller = (() => {
     /**
-     * Traite une trame de données capteurs reçue (WebSocket ou SharedWorker).
+     * Traite une trame de données capteurs reçue.
      * Met à jour le Model et sauvegarde les données dans localStorage
      * pour restauration au prochain chargement.
      * @param {{ capteurs: Array<{ Nom: string, Valeur: string }> }} parsed
@@ -356,7 +356,6 @@ const Controller = (() => {
     }
 
     /**
-     * Connexion via SharedWorker (stratégie préférée).
      * Le SharedWorker maintient une seule connexion WebSocket partagée entre tous les onglets.
      * Bascule en connexion directe si les SharedWorkers ne sont pas supportés.
      */
